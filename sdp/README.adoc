@@ -1,0 +1,117 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+= Software-Defined Perimeter (SDP) Integration
+
+Zero-trust network access for cloud sync operations.
+
+== Architecture
+
+[source]
+----
+┌──────────────────────────────────────────────────────────────┐
+│                    SDP Controller                            │
+│              (cicada identity verification)                  │
+└─────────────────────────┬────────────────────────────────────┘
+                          │ mTLS + post-quantum keys
+          ┌───────────────┼───────────────┐
+          ▼               ▼               ▼
+    ┌──────────┐    ┌──────────┐    ┌──────────┐
+    │ Dropbox  │    │ GDrive   │    │ OneDrive │
+    │ Gateway  │    │ Gateway  │    │ Gateway  │
+    └────┬─────┘    └────┬─────┘    └────┬─────┘
+         │               │               │
+         └───────────────┼───────────────┘
+                         ▼
+              ┌─────────────────────┐
+              │  Cloud Sync Tuner   │
+              │    (this tool)      │
+              └─────────────────────┘
+----
+
+== Components
+
+=== SDP Controller
+
+Uses cicada for:
+
+* Post-quantum key generation (Dilithium, Kyber)
+* Identity verification before tunnel establishment
+* Automated key rotation
+
+=== VPN Options
+
+[cols="1,2,2"]
+|===
+|VPN |Pros |Integration
+
+|**WireGuard**
+|Fast, modern, kernel-level
+|`wg-quick` in compose
+
+|**Tailscale**
+|Zero-config, NAT traversal
+|Tailscale container sidecar
+
+|**Nebula**
+|Mesh networking, certificate-based
+|Pairs well with cicada certs
+
+|**OpenZiti**
+|True SDP, application-embedded
+|Most secure, complex setup
+|===
+
+== WireGuard Integration
+
+[source,yaml]
+----
+# Add to nerdctl-compose.yaml
+services:
+  wireguard:
+    image: cgr.dev/chainguard/wolfi-base:latest
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    volumes:
+      - ./sdp/wg0.conf:/etc/wireguard/wg0.conf:ro
+    command: sh -c "apk add wireguard-tools && wg-quick up wg0 && sleep infinity"
+    networks:
+      - cloud-net
+----
+
+== cicada Integration
+
+Generate keys for SDP authentication:
+
+[source,bash]
+----
+# Generate post-quantum keypair
+julia -e 'using CIcaDA; generate_keypair("cloud-sync", algorithm="dilithium3")'
+
+# Export for WireGuard
+julia -e 'using CIcaDA; export_wireguard_key("cloud-sync")'
+----
+
+== VPN Connect Script
+
+[source,bash]
+----
+#!/bin/bash
+# sdp/vpn-connect.sh
+
+# Verify identity with cicada
+cicada verify-identity --key cloud-sync || exit 1
+
+# Establish WireGuard tunnel
+wg-quick up wg0
+
+# Start cloud sync with rate limiting
+cloud_sync_tuner writes
+----
+
+== Security Model
+
+1. **Verify First**: cicada authenticates before any network access
+2. **Encrypt Always**: All traffic through WireGuard/mTLS
+3. **Least Privilege**: Each cloud service gets separate gateway
+4. **Rotate Keys**: cicada handles automated rotation

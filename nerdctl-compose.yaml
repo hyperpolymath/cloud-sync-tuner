@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# nerdctl compose for cloud-sync-tuner
+# Run: nerdctl compose up
+
+services:
+  cloud-sync-tuner:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: ghcr.io/hyperpolymath/cloud-sync-tuner:latest
+    container_name: cloud-sync-tuner
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./output:/home/tuner/output:rw
+      - ${HOME}/.config/rclone:/home/tuner/.config/rclone:ro
+    devices:
+      - /dev/fuse:/dev/fuse
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    environment:
+      - TERM=xterm-256color
+    networks:
+      - cloud-net
+
+  # Optional: aria2 for accelerated downloads
+  aria2:
+    image: cgr.dev/chainguard/wolfi-base:latest
+    container_name: aria2-rpc
+    command: >
+      sh -c "apk add --no-cache aria2 &&
+             aria2c --enable-rpc --rpc-listen-all=true
+             --rpc-allow-origin-all --max-concurrent-downloads=16
+             --split=16 --max-connection-per-server=16"
+    ports:
+      - "6800:6800"
+    volumes:
+      - ./downloads:/downloads:rw
+    networks:
+      - cloud-net
+    profiles:
+      - accelerated
+
+networks:
+  cloud-net:
+    driver: bridge

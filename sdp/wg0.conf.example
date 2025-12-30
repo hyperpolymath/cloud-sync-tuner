@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# WireGuard configuration template for SDP
+# Copy to ~/.config/cloud-sync-tuner/wg0.conf and fill in values
+
+[Interface]
+# Private key (generate with: wg genkey)
+# Or use cicada: julia -e 'using CIcaDA; export_wireguard_key("cloud-sync")'
+PrivateKey = <YOUR_PRIVATE_KEY>
+
+# Local VPN address
+Address = 10.0.0.2/24
+
+# DNS (optional, use provider's or private)
+DNS = 1.1.1.1
+
+[Peer]
+# SDP gateway public key
+PublicKey = <GATEWAY_PUBLIC_KEY>
+
+# Gateway endpoint
+Endpoint = sdp-gateway.example.com:51820
+
+# Route cloud provider traffic through tunnel
+# Dropbox: 162.125.0.0/16
+# Google: 142.250.0.0/15
+# Microsoft: 13.64.0.0/11
+AllowedIPs = 162.125.0.0/16, 142.250.0.0/15, 13.64.0.0/11
+
+# Keep connection alive behind NAT
+PersistentKeepalive = 25

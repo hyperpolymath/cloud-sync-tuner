@@ -1,0 +1,18 @@
+# Build artifacts
+obj/
+bin/
+*.o
+*.ali
+
+# Editor
+*~
+*.swp
+.vscode/
+.idea/
+
+# Output
+output/
+
+# OS
+.DS_Store
+Thumbs.db

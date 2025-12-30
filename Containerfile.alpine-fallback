@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Cloud Sync Tuner - Alpine fallback (if Wolfi lacks GNAT)
+# Build with: nerdctl build -f Containerfile.alpine-fallback -t cloud-sync-tuner .
+
+# Stage 1: Build with Alpine (has GNAT in testing)
+FROM alpine:edge AS builder
+
+# Enable testing repo for GNAT
+RUN echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
+RUN apk add --no-cache \
+    gcc-gnat@testing \
+    gprbuild@testing \
+    musl-dev \
+    make
+
+WORKDIR /build
+COPY src/ src/
+COPY cloud_sync_tuner.gpr .
+
+RUN mkdir -p obj bin && \
+    gprbuild -P cloud_sync_tuner.gpr
+
+# Stage 2: Runtime on Wolfi (secure, minimal)
+FROM cgr.dev/chainguard/wolfi-base:latest
+
+RUN apk add --no-cache \
+    rclone \
+    fuse3 \
+    libgcc \
+    gcompat
+
+RUN adduser -D -h /home/tuner tuner
+USER tuner
+WORKDIR /home/tuner
+
+COPY --from=builder /build/bin/cloud_sync_tuner /usr/local/bin/
+COPY --chown=tuner:tuner config/ /home/tuner/.config/cloud-sync-tuner/
+
+VOLUME ["/home/tuner/output"]
+ENTRYPOINT ["/usr/local/bin/cloud_sync_tuner"]
+
+LABEL org.opencontainers.image.title="Cloud Sync Tuner" \
+      org.opencontainers.image.source="https://github.com/hyperpolymath/cloud-sync-tuner" \
+      org.opencontainers.image.licenses="AGPL-3.0-or-later"

@@ -1,0 +1,31 @@
+-- SPDX-License-Identifier: AGPL-3.0-or-later
+-- Cloud Sync Tuner - GNAT Project File
+
+project Cloud_Sync_Tuner is
+
+   for Source_Dirs use ("src");
+   for Object_Dir use "obj";
+   for Exec_Dir use "bin";
+   for Main use ("cloud_sync_tuner.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use (
+         "-gnatwa",      -- All warnings
+         "-gnatyy",      -- Style checks
+         "-gnatVa",      -- Validity checks
+         "-gnato",       -- Overflow checks
+         "-fstack-check",
+         "-g",           -- Debug info
+         "-O2"           -- Optimization
+      );
+   end Compiler;
+
+   package Binder is
+      for Default_Switches ("Ada") use ("-E");
+   end Binder;
+
+   package Linker is
+      for Default_Switches ("Ada") use ("-g");
+   end Linker;
+
+end Cloud_Sync_Tuner;

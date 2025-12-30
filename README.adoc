@@ -1,0 +1,154 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+= Cloud Sync Tuner
+:toc:
+:icons: font
+
+image:https://img.shields.io/badge/RSR-Bronze-cd7f32[RSR Bronze,link=https://github.com/hyperpolymath/rhodium-standard-repositories]
+image:https://img.shields.io/badge/License-AGPL--3.0-blue[License]
+
+Ada TUI for managing rclone cloud mount configurations with rate limiting.
+
+== Problem
+
+Cloud providers (especially Dropbox) enforce strict API rate limits. Default rclone settings trigger:
+
+[source]
+----
+Error too_many_requests/. Too many requests. Trying again in 300 seconds.
+----
+
+== Solution
+
+Configure optimal VFS cache modes and rate limiting via TUI or CLI.
+
+== Cache Modes
+
+[cols="1,1,1,1"]
+|===
+|Mode |API Usage |Disk Use |Best For
+
+|Off |🔴 Very High |None |Read-only browsing
+|Minimal |🟠 High |Low |Light usage
+|**Writes** |🟢 Low |Medium |**Daily use (default)**
+|Full |🔴 Very High |High |Offline-first
+|===
+
+== Quick Start
+
+[source,bash]
+----
+# Build
+gprbuild -P cloud_sync_tuner.gpr
+
+# Run TUI
+./bin/cloud_sync_tuner
+
+# Or CLI mode
+./bin/cloud_sync_tuner writes
+----
+
+== Container (nerdctl + Wolfi)
+
+[source,bash]
+----
+# Build
+nerdctl build -t cloud-sync-tuner .
+
+# Run interactive
+nerdctl run -it --rm cloud-sync-tuner
+
+# With compose (includes optional aria2)
+nerdctl compose up
+nerdctl compose --profile accelerated up  # with aria2
+----
+
+== Acceleration Options
+
+=== aria2 Integration
+
+aria2 provides significant download acceleration through:
+
+* **Multi-connection downloads** - 16 connections per file
+* **Segmented downloading** - splits files for parallel fetch
+* **Resume support** - continues interrupted transfers
+* **RPC interface** - programmatic control
+
+Enhancement potential: **3-10x faster downloads** for large files.
+
+[source,bash]
+----
+# Enable in compose
+nerdctl compose --profile accelerated up
+
+# aria2 RPC available at localhost:6800
+----
+
+=== pssh (Parallel SSH)
+
+For multi-host scenarios (syncing to multiple servers):
+
+* **Parallel execution** - run commands across hosts simultaneously
+* **Batch operations** - deploy service files to multiple machines
+* **Centralized management** - single point of control
+
+Enhancement potential: **Linear speedup** with host count for deployment.
+
+[source,bash]
+----
+# Deploy to multiple hosts
+pssh -h hosts.txt -i 'systemctl --user restart rclone-dropbox'
+
+# Copy generated configs
+pscp -h hosts.txt output/*.service ~/.config/systemd/user/
+----
+
+=== Combined Architecture
+
+[source]
+----
+┌─────────────────────────────────────────┐
+│         Cloud Sync Tuner (TUI)          │
+└─────────────────┬───────────────────────┘
+                  │
+    ┌─────────────┴─────────────┐
+    │     Service Generator     │
+    └─────────────┬─────────────┘
+                  │
+    ┌─────────────┼─────────────┐
+    ▼             ▼             ▼
+┌────────┐  ┌──────────┐  ┌──────────┐
+│ rclone │  │  aria2   │  │  pssh    │
+│ (sync) │  │ (accel)  │  │ (deploy) │
+└────────┘  └──────────┘  └──────────┘
+----
+
+== Laminar Integration
+
+This tool complements https://github.com/hyperpolymath/laminar[laminar] for cloud-to-cloud transfers:
+
+* Laminar handles streaming transfers between clouds
+* Cloud Sync Tuner manages local mount configurations
+* Both use rclone as the data plane
+
+== Supported Services
+
+* Dropbox (`dropbox:`)
+* Google Drive (`gdrive:`)
+* OneDrive (`onedrive:`)
+
+== Architecture Support
+
+Built on Ada (GNAT) with libcurl backend options:
+
+[cols="1,1,1,1,1"]
+|===
+|Platform |i386 |amd64 |ARM |RISC-V
+
+|Linux |✓ |✓ |✓ |✓
+|Minix |✓ |✓ |- |-
+|Android |- |✓ |✓ |-
+|===
+
+== License
+
+AGPL-3.0-or-later
