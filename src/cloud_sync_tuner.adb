@@ -13,7 +13,7 @@ with GNAT.OS_Lib;
 procedure Cloud_Sync_Tuner is
 
    -- Version
-   Version : constant String := "0.3.0";
+   Version : constant String := "1.0.0";
 
    -- ANSI color codes for TUI
    Reset      : constant String := ASCII.ESC & "[0m";
@@ -1286,6 +1286,7 @@ procedure Cloud_Sync_Tuner is
       Put_Line (Bold & "OTHER OPTIONS:" & Reset);
       Put_Line ("  -h, --help          Show this help");
       Put_Line ("  -v, --version       Show version");
+      Put_Line ("  --status            Check sync service health");
       Put_Line ("  --validate <mode>   Validate mode name");
       Put_Line ("  --apply             Auto-install generated services");
       Put_Line ("  --dry-run           Show what would be done");
@@ -1389,6 +1390,26 @@ procedure Cloud_Sync_Tuner is
             -- Version option
             if Arg = "--version" or Arg = "-v" then
                Print_Version;
+               return;
+            end if;
+
+            -- Status option (delegates to cloud-sync-status script)
+            if Arg = "--status" then
+               declare
+                  Success : Boolean;
+                  Args : GNAT.OS_Lib.Argument_List_Access :=
+                     new GNAT.OS_Lib.Argument_List (1 .. 0);
+               begin
+                  GNAT.OS_Lib.Spawn (
+                     Program_Name => "cloud-sync-status",
+                     Args         => Args.all,
+                     Success      => Success);
+                  if not Success then
+                     Put_Line (Yellow & "Note: cloud-sync-status not found." & Reset);
+                     Put_Line ("Install with: just install");
+                  end if;
+                  GNAT.OS_Lib.Free (Args);
+               end;
                return;
             end if;
 
