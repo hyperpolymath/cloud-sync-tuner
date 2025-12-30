@@ -1,0 +1,301 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+= Cicada Isolation Architecture
+:toc:
+
+== Security Model
+
+cicada handles post-quantum identity and key material. It MUST:
+
+1. **Never touch external network** - no egress, no ingress
+2. **Run in isolated container** - separate network namespace
+3. **Communicate only via Unix socket** - no TCP/IP even locally
+
+== Container Isolation
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────────┐
+│                     Host System                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────┐    ┌─────────────────────────────────┐ │
+│  │   cicada container  │    │    cloud-sync container         │ │
+│  │                     │    │                                 │ │
+│  │  network: none      │    │  network: vpn-only              │ │
+│  │  no capabilities    │    │  ┌─────────────────────────┐   │ │
+│  │  read-only rootfs   │    │  │  zig-wireguard          │   │ │
+│  │                     │    │  │  zig-rclone             │   │ │
+│  │  ┌───────────────┐  │    │  │  zig-fuse-ext           │   │ │
+│  │  │ cicada daemon │  │    │  └─────────────────────────┘   │ │
+│  │  └───────┬───────┘  │    │              │                  │ │
+│  │          │          │    │              │                  │ │
+│  └──────────┼──────────┘    └──────────────┼──────────────────┘ │
+│             │ Unix socket                  │                    │
+│             └──────────────────────────────┘                    │
+│                  /run/cicada/cicada.sock                        │
+│                  (bind-mounted, 0600)                           │
+└─────────────────────────────────────────────────────────────────┘
+----
+
+== Container Configuration
+
+=== cicada Container (nerdctl)
+
+[source,yaml]
+----
+# cicada-compose.yaml
+services:
+  cicada:
+    image: ghcr.io/hyperpolymath/cicada:latest
+    container_name: cicada-vault
+
+    # CRITICAL: No network access whatsoever
+    network_mode: none
+
+    # Minimal capabilities
+    cap_drop:
+      - ALL
+
+    # Read-only root filesystem
+    read_only: true
+
+    # No privilege escalation
+    security_opt:
+      - no-new-privileges:true
+
+    # Seccomp profile - restrict syscalls
+    security_opt:
+      - seccomp=/etc/cicada/seccomp.json
+
+    # Unix socket for IPC only
+    volumes:
+      - type: bind
+        source: /run/cicada
+        target: /run/cicada
+        bind:
+          propagation: private
+      - type: bind
+        source: /var/lib/cicada/keys
+        target: /keys
+        read_only: false
+
+    # Tmpfs for runtime data
+    tmpfs:
+      - /tmp:size=10M,mode=1700
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.5'
+----
+
+=== Host Firewall Rules (nftables)
+
+[source,nft]
+----
+#!/usr/sbin/nft -f
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Cicada isolation firewall rules
+
+table inet cicada_isolation {
+    # Block any attempt to create network namespace escape
+    chain output {
+        type filter hook output priority 0; policy accept;
+
+        # If somehow cicada container gets network, block everything
+        meta skuid cicada drop
+        meta skgid cicada drop
+    }
+
+    chain input {
+        type filter hook input priority 0; policy accept;
+
+        # No incoming connections to cicada user
+        meta skuid cicada drop
+    }
+}
+----
+
+== Unix Socket Protocol
+
+=== Socket Permissions
+
+[source,bash]
+----
+# Create socket directory with strict permissions
+mkdir -p /run/cicada
+chmod 0700 /run/cicada
+chown cicada:cloud-sync /run/cicada
+
+# Socket created by cicada daemon
+# /run/cicada/cicada.sock - mode 0660, owner cicada:cloud-sync
+----
+
+=== IPC Message Format
+
+[source]
+----
+Request:  { "op": "get_key", "identity": "cloud-sync", "format": "wg" }
+Response: { "key": "<base64>", "type": "x25519+kyber768" }
+
+Request:  { "op": "sign", "identity": "cloud-sync", "data": "<base64>" }
+Response: { "signature": "<base64>", "algorithm": "dilithium3" }
+----
+
+=== Zig Client Integration
+
+[source,zig]
+----
+const std = @import("std");
+
+pub const CicadaClient = struct {
+    socket: std.net.Stream,
+
+    pub fn connect() !CicadaClient {
+        // Unix socket only - no network
+        const socket = try std.net.connectUnixSocket("/run/cicada/cicada.sock");
+        return .{ .socket = socket };
+    }
+
+    pub fn getWireGuardKey(self: *CicadaClient, identity: []const u8) !Key {
+        const request = try std.json.stringifyAlloc(allocator, .{
+            .op = "get_key",
+            .identity = identity,
+            .format = "wg",
+        });
+        defer allocator.free(request);
+
+        try self.socket.writeAll(request);
+
+        var response_buf: [4096]u8 = undefined;
+        const len = try self.socket.read(&response_buf);
+
+        const response = try std.json.parseFromSlice(
+            KeyResponse,
+            allocator,
+            response_buf[0..len],
+            .{},
+        );
+
+        return Key.fromBase64(response.value.key);
+    }
+
+    pub fn close(self: *CicadaClient) void {
+        self.socket.close();
+    }
+};
+----
+
+== Security Verification
+
+=== Startup Checks
+
+[source,bash]
+----
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# verify-cicada-isolation.sh
+
+set -euo pipefail
+
+# Verify cicada container has no network
+verify_no_network() {
+    local netns=$(nerdctl inspect cicada-vault --format '{{.NetworkSettings.SandboxKey}}')
+
+    if [ -n "$netns" ] && [ "$netns" != "null" ]; then
+        echo "FATAL: cicada container has network namespace"
+        exit 1
+    fi
+
+    # Double-check with nsenter
+    if nerdctl exec cicada-vault ip link show 2>/dev/null | grep -v "^1: lo"; then
+        echo "FATAL: cicada container has non-loopback interfaces"
+        exit 1
+    fi
+}
+
+# Verify socket permissions
+verify_socket_perms() {
+    local perms=$(stat -c %a /run/cicada/cicada.sock 2>/dev/null || echo "missing")
+
+    if [ "$perms" != "660" ]; then
+        echo "FATAL: cicada socket has wrong permissions: $perms (expected 660)"
+        exit 1
+    fi
+}
+
+# Verify no TCP listeners in cicada
+verify_no_tcp() {
+    if nerdctl exec cicada-vault ss -tlnp 2>/dev/null | grep -q LISTEN; then
+        echo "FATAL: cicada is listening on TCP"
+        exit 1
+    fi
+}
+
+verify_no_network
+verify_socket_perms
+verify_no_tcp
+
+echo "Cicada isolation verified"
+----
+
+== Threat Model
+
+|===
+|Threat |Mitigation |Verification
+
+|Network exfiltration of keys
+|network_mode: none
+|`ip link` shows only lo
+
+|Container escape via capabilities
+|cap_drop: ALL
+|`capsh --print` shows empty
+
+|Privilege escalation
+|no-new-privileges, read-only rootfs
+|`cat /proc/1/status \| grep NoNewPrivs`
+
+|Side-channel via shared memory
+|Separate tmpfs, no /dev/shm sharing
+|`mount \| grep shm`
+
+|Socket hijacking
+|0660 permissions, cicada:cloud-sync ownership
+|`stat /run/cicada/cicada.sock`
+
+|Syscall-based escape
+|Seccomp profile
+|`cat /proc/1/status \| grep Seccomp`
+|===
+
+== Integration with cloud-sync-tuner
+
+The main cloud-sync container connects to cicada only for key retrieval at startup:
+
+[source,zig]
+----
+pub fn establishSdpTunnel() !void {
+    // 1. Get key from isolated cicada (Unix socket only)
+    var cicada = try CicadaClient.connect();
+    defer cicada.close();
+
+    const wg_key = try cicada.getWireGuardKey("cloud-sync");
+
+    // 2. cicada connection closed - no further contact needed
+    // Key material now in memory only
+
+    // 3. Establish WireGuard tunnel with retrieved key
+    var device = try wg.Device.create("wg0");
+    try device.setPrivateKey(wg_key);
+    try device.up();
+}
+----
+
+Key material exists in:
+1. cicada container (encrypted at rest)
+2. cloud-sync container memory (runtime only)
+3. Kernel WireGuard module (runtime only)
+
+Never on disk unencrypted, never on network.
