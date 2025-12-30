@@ -11,31 +11,102 @@ services:
     container_name: cloud-sync-tuner
     stdin_open: true
     tty: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64M
     volumes:
       - ./output:/home/tuner/output:rw
       - ${HOME}/.config/rclone:/home/tuner/.config/rclone:ro
+      - ./config:/home/tuner/.config/cloud-sync-tuner:ro
     devices:
       - /dev/fuse:/dev/fuse
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_ADMIN  # Required for FUSE only
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - TERM=xterm-256color
+      - XDG_CONFIG_HOME=/home/tuner/.config
+    networks:
+      - cloud-net
+    depends_on:
+      wireguard:
+        condition: service_healthy
+    profiles:
+      - default
+
+  # VPN sidecar (WireGuard)
+  wireguard:
+    image: cgr.dev/chainguard/wolfi-base:latest
+    container_name: cloud-sync-vpn
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    volumes:
+      - ./sdp/wg0.conf:/etc/wireguard/wg0.conf:ro
+    command: >
+      sh -c "apk add --no-cache wireguard-tools iproute2 &&
+             wg-quick up wg0 &&
+             exec sleep infinity"
+    healthcheck:
+      test: ["CMD", "wg", "show", "wg0"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cloud-net
+    profiles:
+      - vpn
+
+  # Standalone mode (no VPN)
+  cloud-sync-tuner-standalone:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: ghcr.io/hyperpolymath/cloud-sync-tuner:latest
+    container_name: cloud-sync-tuner-standalone
+    stdin_open: true
+    tty: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64M
+    volumes:
+      - ./output:/home/tuner/output:rw
+      - ${HOME}/.config/rclone:/home/tuner/.config/rclone:ro
+      - ./config:/home/tuner/.config/cloud-sync-tuner:ro
+    devices:
+      - /dev/fuse:/dev/fuse
+    cap_drop:
+      - ALL
     cap_add:
       - SYS_ADMIN
     security_opt:
-      - apparmor:unconfined
+      - no-new-privileges:true
     environment:
       - TERM=xterm-256color
     networks:
       - cloud-net
+    profiles:
+      - standalone
 
-  # Optional: aria2 for accelerated downloads
+  # aria2 for accelerated downloads
   aria2:
     image: cgr.dev/chainguard/wolfi-base:latest
     container_name: aria2-rpc
+    read_only: true
+    tmpfs:
+      - /tmp:size=128M
     command: >
       sh -c "apk add --no-cache aria2 &&
              aria2c --enable-rpc --rpc-listen-all=true
              --rpc-allow-origin-all --max-concurrent-downloads=16
-             --split=16 --max-connection-per-server=16"
+             --split=16 --max-connection-per-server=16
+             --dir=/downloads"
     ports:
-      - "6800:6800"
+      - "127.0.0.1:6800:6800"  # localhost only
     volumes:
       - ./downloads:/downloads:rw
     networks:

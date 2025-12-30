@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Cloud Sync Tuner Configuration
+# Copy to ~/.config/cloud-sync-tuner/config.toml
+
+[general]
+# Default cache mode: off, minimal, writes, full
+default_mode = "writes"
+
+# Output directory for generated service files
+output_dir = "${XDG_CONFIG_HOME}/systemd/user"
+
+[rate_limits]
+# Transactions per second (Dropbox safe: 4)
+tps_limit = 4
+tps_burst = 1
+
+# VFS settings
+read_chunk_size = "32M"
+cache_max_age = "72h"
+dir_cache_time = "5m"
+
+[[services]]
+name = "Dropbox"
+remote = "dropbox:"
+mount_point = "/run/media/${USER}/eclipse/Cloud/Dropbox"
+enabled = true
+
+[[services]]
+name = "Google Drive"
+remote = "gdrive:"
+mount_point = "/run/media/${USER}/eclipse/Cloud/GoogleDrive"
+enabled = true
+
+[[services]]
+name = "OneDrive"
+remote = "onedrive:"
+mount_point = "/run/media/${USER}/eclipse/Cloud/OneDrive"
+enabled = true
+
+[vpn]
+# Enable SDP/VPN before cloud access
+enabled = false
+type = "wireguard"  # wireguard, tailscale, nebula
+config_path = "${XDG_CONFIG_HOME}/cloud-sync-tuner/wg0.conf"
+
+[cicada]
+# cicada integration for post-quantum identity
+enabled = false
+key_name = "cloud-sync"
+auto_rotate = true
