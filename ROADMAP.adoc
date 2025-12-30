@@ -1,0 +1,199 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+= Cloud Sync Tuner Roadmap
+:toc:
+:icons: font
+
+== Vision
+
+A secure, cross-platform cloud synchronization system with:
+
+* Zero-trust SDP architecture
+* Post-quantum cryptographic identity
+* Rate-limit-aware cloud access
+* Embedded Zig FFI for performance
+
+== Milestones
+
+=== v0.1.0 - Foundation (Current)
+
+[cols="1,1,3"]
+|===
+|Status |Component |Description
+
+|✓ |Ada TUI |Cache mode selection, service file generation
+|✓ |Containerization |Wolfi image with nerdctl compose
+|✓ |Documentation |README, ARCHITECTURE, RSR compliance
+|✓ |SDP Design |cicada isolation architecture documented
+|⚪ |aria2 Integration |Download acceleration (in progress)
+|⚪ |pssh Integration |Multi-host deployment
+|===
+
+=== v0.2.0 - Zig FFI Integration
+
+[cols="1,1,3"]
+|===
+|Status |Component |Description
+
+|✓ |zig-wireguard |VPN bindings to libwireguard
+|✓ |zig-rclone |Cloud storage bindings to librclone
+|✓ |zig-fuse-ext |Extended FUSE with rate limiting
+|⚪ |Integration |Wire Zig libraries into cloud-sync-tuner
+|⚪ |Cross-compile |Build for all target platforms
+|===
+
+=== v0.3.0 - SDP Implementation
+
+[cols="1,1,3"]
+|===
+|Status |Component |Description
+
+|✓ |Cicada isolation |Network-isolated container design
+|⚪ |Cicada integration |Unix socket IPC implementation
+|⚪ |WireGuard tunnel |VPN establishment before cloud access
+|⚪ |Key rotation |Automated post-quantum key refresh
+|⚪ |Audit logging |Security event logging
+|===
+
+=== v0.4.0 - Production Hardening
+
+[cols="1,1,3"]
+|===
+|Status |Component |Description
+
+|⚪ |Seccomp profiles |Syscall filtering for containers
+|⚪ |SELinux/AppArmor |MAC policies for host deployment
+|⚪ |Health checks |Liveness/readiness probes
+|⚪ |Metrics |Prometheus endpoint for monitoring
+|⚪ |Alerting |Rate limit warning notifications
+|===
+
+=== v1.0.0 - Stable Release
+
+[cols="1,1,3"]
+|===
+|Status |Component |Description
+
+|⚪ |API stability |Zig FFI API freeze
+|⚪ |Documentation |Complete user and developer guides
+|⚪ |Testing |Integration test suite
+|⚪ |Packaging |Distribution packages (deb, rpm, apk)
+|⚪ |CI/CD |Automated release pipeline
+|===
+
+== Platform Roadmap
+
+=== Tier 1 (Full Support)
+
+* Linux (amd64, arm64) - libfuse3, kernel WireGuard
+* macOS (amd64, arm64) - macFUSE, Network.framework
+
+=== Tier 2 (Partial Support)
+
+* FreeBSD - fusefs, if_wg kernel module
+* Windows - Remote ops only (no FUSE)
+
+=== Tier 3 (Best Effort)
+
+* Linux (i386, RISC-V) - Limited testing
+* Minix - libcurl fallback, no FUSE
+* Android - Remote ops only
+
+=== Not Planned
+
+* iOS - No FUSE support, App Store restrictions
+* Proprietary RTOS - No kernel module support
+
+== Zig FFI Library Roadmap
+
+=== zig-wireguard
+
+[cols="1,3"]
+|===
+|Version |Features
+
+|0.1.0 |Device/peer management, key handling, cicada import
+|0.2.0 |Platform-specific optimizations (netlink, Network.framework)
+|0.3.0 |Dynamic peer discovery, NAT traversal helpers
+|1.0.0 |API stability, comprehensive test suite
+|===
+
+=== zig-rclone
+
+[cols="1,3"]
+|===
+|Version |Features
+
+|0.1.0 |Remote ops, VFS mount, rate limiting
+|0.2.0 |Stream transfers, parallel connections
+|0.3.0 |OAuth flow handling, config management
+|1.0.0 |API stability, all 40+ backends tested
+|===
+
+=== zig-fuse-ext
+
+[cols="1,3"]
+|===
+|Version |Features
+
+|0.1.0 |FileSystem trait, cloud rate limiter, write-back cache
+|0.2.0 |Read-ahead prefetch, adaptive chunk sizing
+|0.3.0 |Multi-backend aggregation, tiered caching
+|1.0.0 |API stability, performance benchmarks
+|===
+
+== Security Roadmap
+
+=== Phase 1: Isolation (Current)
+
+* Container network isolation
+* Unix socket IPC only
+* Minimal capabilities
+
+=== Phase 2: Defense in Depth
+
+* nftables firewall rules
+* Seccomp syscall filtering
+* Read-only root filesystem
+
+=== Phase 3: Post-Quantum
+
+* cicada Kyber768 + x25519 hybrid keys
+* Key rotation automation
+* Forward secrecy guarantees
+
+=== Phase 4: Audit & Compliance
+
+* Security audit logging
+* OpenSSF Scorecard compliance
+* Penetration testing
+
+== Integration Roadmap
+
+=== laminar
+
+* Stream transfers via zig-rclone
+* Shared rate limiting configuration
+* Unified monitoring dashboard
+
+=== cicada
+
+* Post-quantum key generation
+* Identity verification before tunnel
+* Key material isolation
+
+=== gitvisor
+
+* Config file version control
+* Automated backup of settings
+* Multi-machine sync
+
+== Contributing
+
+See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] for how to help with roadmap items.
+
+Priority areas:
+
+1. Zig FFI library implementation
+2. Platform testing (especially macOS, FreeBSD)
+3. Security hardening
+4. Documentation improvements

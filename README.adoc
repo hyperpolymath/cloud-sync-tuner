@@ -6,7 +6,7 @@
 image:https://img.shields.io/badge/RSR-Bronze-cd7f32[RSR Bronze,link=https://github.com/hyperpolymath/rhodium-standard-repositories]
 image:https://img.shields.io/badge/License-AGPL--3.0-blue[License]
 
-Ada TUI for managing rclone cloud mount configurations with rate limiting.
+Ada TUI for managing rclone cloud mount configurations with rate limiting, SDP (Software-Defined Perimeter) security, and Zig FFI integration.
 
 == Problem
 
@@ -19,7 +19,7 @@ Error too_many_requests/. Too many requests. Trying again in 300 seconds.
 
 == Solution
 
-Configure optimal VFS cache modes and rate limiting via TUI or CLI.
+Configure optimal VFS cache modes and rate limiting via TUI or CLI, wrapped in a zero-trust SDP architecture with post-quantum identity management.
 
 == Cache Modes
 
@@ -60,7 +60,71 @@ nerdctl run -it --rm cloud-sync-tuner
 # With compose (includes optional aria2)
 nerdctl compose up
 nerdctl compose --profile accelerated up  # with aria2
+nerdctl compose --profile vpn up          # with WireGuard SDP
 ----
+
+== SDP (Software-Defined Perimeter)
+
+Cloud Sync Tuner supports zero-trust network architecture:
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────────┐
+│                     Host System                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────┐    ┌─────────────────────────────────┐ │
+│  │   cicada container  │    │    cloud-sync container         │ │
+│  │   (network: none)   │    │    (network: vpn-only)          │ │
+│  │                     │    │                                 │ │
+│  │   Post-quantum      │◄───┤  WireGuard + rclone + FUSE      │ │
+│  │   identity/keys     │    │                                 │ │
+│  └─────────────────────┘    └─────────────────────────────────┘ │
+│            │ Unix socket only                                    │
+│            └──────────────────────────────────────────────────── │
+└─────────────────────────────────────────────────────────────────┘
+----
+
+Key features:
+
+* **cicada integration** - Post-quantum cryptographic identity (Kyber768 + x25519 hybrid)
+* **Network isolation** - cicada container has `network_mode: none`
+* **Unix socket IPC** - Key material never touches network interfaces
+* **WireGuard VPN** - Encrypted tunnel before any cloud access
+
+See link:sdp/CICADA-ISOLATION.adoc[Cicada Isolation Architecture] for details.
+
+== Zig FFI Libraries
+
+Cloud Sync Tuner integrates with Zig FFI bindings for cross-platform support:
+
+[cols="1,2,1"]
+|===
+|Library |Purpose |Repo
+
+|**zig-wireguard**
+|VPN tunnel management via libwireguard
+|https://github.com/hyperpolymath/zig-wireguard[zig-wireguard]
+
+|**zig-rclone**
+|Cloud storage via librclone (40+ backends)
+|https://github.com/hyperpolymath/zig-rclone[zig-rclone]
+
+|**zig-fuse-ext**
+|Extended FUSE with rate limiting/caching
+|https://github.com/hyperpolymath/zig-fuse-ext[zig-fuse-ext]
+|===
+
+=== Why Zig FFI?
+
+[cols="1,2"]
+|===
+|Feature |Benefit
+
+|`@cImport` |Direct C header import, no manual bindings
+|Cross-compilation |Single build for Linux, macOS, FreeBSD, Windows
+|No hidden malloc |Explicit memory, allocator control
+|Error unions |Convert C error codes to Zig errors
+|===
 
 == Acceleration Options
 
@@ -102,24 +166,28 @@ pssh -h hosts.txt -i 'systemctl --user restart rclone-dropbox'
 pscp -h hosts.txt output/*.service ~/.config/systemd/user/
 ----
 
-=== Combined Architecture
+== Architecture
 
 [source]
 ----
-┌─────────────────────────────────────────┐
-│         Cloud Sync Tuner (TUI)          │
-└─────────────────┬───────────────────────┘
-                  │
-    ┌─────────────┴─────────────┐
-    │     Service Generator     │
-    └─────────────┬─────────────┘
-                  │
-    ┌─────────────┼─────────────┐
-    ▼             ▼             ▼
-┌────────┐  ┌──────────┐  ┌──────────┐
-│ rclone │  │  aria2   │  │  pssh    │
-│ (sync) │  │ (accel)  │  │ (deploy) │
-└────────┘  └──────────┘  └──────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                   Cloud Sync Tuner                           │
+│                      (Ada TUI)                               │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+         ┌───────────────┼───────────────┐
+         │               │               │
+         ▼               ▼               ▼
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│ zig-rclone  │  │zig-wireguard│  │zig-fuse-ext │
+│ (storage)   │  │   (VPN)     │  │  (mount)    │
+└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+       │                │                │
+       ▼                ▼                ▼
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│  librclone  │  │libwireguard │  │  libfuse3   │
+│   (Go→C)    │  │    (C)      │  │    (C)      │
+└─────────────┘  └─────────────┘  └─────────────┘
 ----
 
 == Laminar Integration
@@ -129,24 +197,27 @@ This tool complements https://github.com/hyperpolymath/laminar[laminar] for clou
 * Laminar handles streaming transfers between clouds
 * Cloud Sync Tuner manages local mount configurations
 * Both use rclone as the data plane
+* zig-rclone enables embedded transfers without subprocess overhead
 
 == Supported Services
 
 * Dropbox (`dropbox:`)
 * Google Drive (`gdrive:`)
 * OneDrive (`onedrive:`)
+* 40+ additional backends via librclone
 
-== Architecture Support
+== Platform Support
 
-Built on Ada (GNAT) with libcurl backend options:
-
-[cols="1,1,1,1,1"]
+[cols="1,1,1,1,1,1"]
 |===
-|Platform |i386 |amd64 |ARM |RISC-V
+|Platform |i386 |amd64 |ARM |RISC-V |Notes
 
-|Linux |✓ |✓ |✓ |✓
-|Minix |✓ |✓ |- |-
-|Android |- |✓ |✓ |-
+|Linux |✓ |✓ |✓ |✓ |Full support
+|macOS |- |✓ |✓ |- |macFUSE required
+|FreeBSD |- |✓ |- |- |fusefs-libs
+|Windows |- |✓ |- |- |No FUSE, remote ops only
+|Minix |✓ |✓ |- |- |libcurl fallback
+|Android |- |✓ |✓ |- |No mounts, remote ops only
 |===
 
 == License
