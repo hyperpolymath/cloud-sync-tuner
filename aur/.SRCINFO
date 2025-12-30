@@ -1,0 +1,27 @@
+pkgbase = cloud-sync-tuner
+	pkgdesc = Ada TUI for managing rclone cloud mount configurations with rate limiting and SELinux support
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://github.com/hyperpolymath/cloud-sync-tuner
+	arch = x86_64
+	arch = i686
+	arch = aarch64
+	license = AGPL-3.0-or-later
+	makedepends = gnat
+	makedepends = gprbuild
+	makedepends = rust
+	makedepends = cargo
+	depends = rclone
+	depends = fuse3
+	depends = glibc
+	optdepends = systemd: for user service management
+	optdepends = libnotify: for desktop notifications
+	optdepends = nautilus: for GNOME Files sync status emblems
+	optdepends = dolphin: for KDE file manager integration
+	optdepends = selinux-utils: for SELinux policy installation
+	optdepends = audit: for enterprise compliance logging
+	provides = cloud-sync-tuner
+	conflicts = cloud-sync-tuner-git
+	source = cloud-sync-tuner-1.0.0.tar.gz::https://github.com/hyperpolymath/cloud-sync-tuner/archive/v1.0.0.tar.gz
+
+pkgname = cloud-sync-tuner

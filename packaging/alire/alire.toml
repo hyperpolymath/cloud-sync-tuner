@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[general]
+name = "cloud_sync_tuner"
+description = "Ada TUI for managing rclone cloud mounts with rate limiting"
+version = "1.0.0"
+
+authors = ["hyperpolymath"]
+maintainers = ["hyperpolymath <hyperpolymath@users.noreply.github.com>"]
+maintainers-logins = ["hyperpolymath"]
+licenses = "AGPL-3.0-or-later"
+website = "https://github.com/hyperpolymath/cloud-sync-tuner"
+tags = ["tui", "rclone", "cloud", "sync", "dropbox", "rate-limiting"]
+
+executables = ["cloud_sync_tuner"]
+
+[gpr-externals]
+BUILD_MODE = ["debug", "release"]
+
+[gpr-set-externals]
+BUILD_MODE = "release"
+
+[[depends-on]]
+gnat = ">=12"
+
+[origin]
+url = "https://github.com/hyperpolymath/cloud-sync-tuner/archive/v1.0.0.tar.gz"
+hashes = ["sha256:PLACEHOLDER"]
+
+[[actions]]
+type = "post-fetch"
+command = ["gprbuild", "-P", "cloud_sync_tuner.gpr", "-XBUILD_MODE=release"]

@@ -1,0 +1,28 @@
+{
+    "version": "1.0.0",
+    "description": "Ada TUI for managing rclone cloud mount configurations with rate limiting",
+    "homepage": "https://github.com/hyperpolymath/cloud-sync-tuner",
+    "license": "AGPL-3.0-or-later",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/hyperpolymath/cloud-sync-tuner/releases/download/v1.0.0/cloud-sync-tuner-windows-amd64.zip",
+            "hash": "PLACEHOLDER"
+        }
+    },
+    "bin": "cloud-sync-tuner.exe",
+    "checkver": {
+        "github": "https://github.com/hyperpolymath/cloud-sync-tuner"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/hyperpolymath/cloud-sync-tuner/releases/download/v$version/cloud-sync-tuner-windows-amd64.zip"
+            }
+        }
+    },
+    "depends": ["rclone"],
+    "notes": [
+        "FUSE mounts are not available on Windows.",
+        "Use CLI mode for remote operations: cloud-sync-tuner writes"
+    ]
+}

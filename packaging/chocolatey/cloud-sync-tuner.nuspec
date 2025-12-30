@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>cloud-sync-tuner</id>
+    <version>1.0.0</version>
+    <title>Cloud Sync Tuner</title>
+    <authors>hyperpolymath</authors>
+    <owners>hyperpolymath</owners>
+    <licenseUrl>https://github.com/hyperpolymath/cloud-sync-tuner/blob/main/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/hyperpolymath/cloud-sync-tuner</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Ada TUI for managing rclone cloud mount configurations with rate limiting.
+
+Cloud Sync Tuner provides an interactive terminal interface for configuring rclone
+cloud mounts with optimal rate limiting settings. It generates service configurations
+with appropriate VFS cache modes to prevent API rate limiting from cloud providers
+like Dropbox.
+
+Note: FUSE mounts are not available on Windows. This package provides remote
+operations only (copy, sync, ls, etc.).</description>
+    <summary>Configure rclone cloud mounts with rate limiting (CLI mode on Windows)</summary>
+    <releaseNotes>https://github.com/hyperpolymath/cloud-sync-tuner/releases/tag/v1.0.0</releaseNotes>
+    <copyright>Copyright 2025 hyperpolymath</copyright>
+    <tags>rclone cloud sync dropbox gdrive onedrive rate-limiting</tags>
+    <projectSourceUrl>https://github.com/hyperpolymath/cloud-sync-tuner</projectSourceUrl>
+    <docsUrl>https://github.com/hyperpolymath/cloud-sync-tuner#readme</docsUrl>
+    <bugTrackerUrl>https://github.com/hyperpolymath/cloud-sync-tuner/issues</bugTrackerUrl>
+    <dependencies>
+      <dependency id="rclone" version="1.60.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<component type="console-application">
+  <id>com.hyperpolymath.CloudSyncTuner</id>
+  <name>Cloud Sync Tuner</name>
+  <summary>Configure rclone cloud mounts with rate limiting</summary>
+  <description>
+    <p>
+      Cloud Sync Tuner provides an interactive terminal interface for
+      configuring rclone cloud mounts with optimal rate limiting settings.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>TUI for cache mode selection (off, minimal, writes, full)</li>
+      <li>Rate limiting configuration optimized per provider</li>
+      <li>Smart sync with bandwidth scheduling</li>
+      <li>SELinux policy for enterprise security</li>
+      <li>Desktop integration (Nautilus, Dolphin)</li>
+      <li>System tray daemon with notifications</li>
+    </ul>
+  </description>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+  <developer_name>hyperpolymath</developer_name>
+  <url type="homepage">https://github.com/hyperpolymath/cloud-sync-tuner</url>
+  <url type="bugtracker">https://github.com/hyperpolymath/cloud-sync-tuner/issues</url>
+  <categories>
+    <category>Utility</category>
+    <category>FileTools</category>
+    <category>Network</category>
+  </categories>
+  <provides>
+    <binary>cloud-sync-tuner</binary>
+    <binary>cloud-sync-overlay</binary>
+    <binary>cloud-sync-tray</binary>
+    <binary>cloud-sync-status</binary>
+  </provides>
+  <releases>
+    <release version="1.0.0" date="2025-12-30">
+      <description>
+        <p>Initial release with full feature set:</p>
+        <ul>
+          <li>TUI for rclone cache mode configuration</li>
+          <li>Smart sync with bandwidth scheduling</li>
+          <li>SELinux policy and audit rules</li>
+          <li>Desktop integration and system tray</li>
+          <li>Formal verification tests</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+  <content_rating type="oars-1.1" />
+</component>

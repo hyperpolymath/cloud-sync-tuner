@@ -1,0 +1,68 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+PortSystem          1.0
+PortGroup           github 1.0
+
+github.setup        hyperpolymath cloud-sync-tuner 1.0.0 v
+revision            0
+categories          sysutils
+platforms           darwin
+license             AGPL-3
+maintainers         {hyperpolymath @hyperpolymath}
+description         Ada TUI for managing rclone cloud mounts with rate limiting
+long_description    Cloud Sync Tuner provides an interactive terminal interface for \
+                    configuring rclone cloud mounts with optimal rate limiting settings. \
+                    It generates launchd/systemd service files with appropriate VFS cache \
+                    modes to prevent API rate limiting from cloud providers like Dropbox.
+
+checksums           rmd160  PLACEHOLDER \
+                    sha256  PLACEHOLDER \
+                    size    PLACEHOLDER
+
+depends_build       port:gnat \
+                    port:gprbuild \
+                    port:rust \
+                    port:cargo
+
+depends_lib         port:rclone
+
+depends_run         port:macfuse
+
+build.cmd           gprbuild
+build.args          -P cloud_sync_tuner.gpr -XBUILD_MODE=release
+
+post-build {
+    system -W ${worksrcpath}/overlay-daemon "cargo build --release"
+    system -W ${worksrcpath}/tray-daemon "cargo build --release"
+}
+
+destroot {
+    xinstall -m 755 ${worksrcpath}/bin/cloud_sync_tuner \
+        ${destroot}${prefix}/bin/cloud-sync-tuner
+    xinstall -m 755 ${worksrcpath}/overlay-daemon/target/release/cloud-sync-overlay \
+        ${destroot}${prefix}/bin/cloud-sync-overlay
+    xinstall -m 755 ${worksrcpath}/tray-daemon/target/release/cloud-sync-tray \
+        ${destroot}${prefix}/bin/cloud-sync-tray
+    xinstall -m 755 ${worksrcpath}/scripts/cloud-sync-status \
+        ${destroot}${prefix}/bin/cloud-sync-status
+
+    xinstall -m 644 ${worksrcpath}/man/cloud-sync-tuner.1 \
+        ${destroot}${prefix}/share/man/man1/
+
+    xinstall -d ${destroot}${prefix}/share/${name}
+    xinstall -m 644 ${worksrcpath}/config/config.toml.example \
+        ${destroot}${prefix}/share/${name}/
+    xinstall -m 644 ${worksrcpath}/config/schema.ncl \
+        ${destroot}${prefix}/share/${name}/
+}
+
+notes "
+To start cloud-sync-tray at login:
+    mkdir -p ~/Library/LaunchAgents
+    cp ${prefix}/share/${name}/com.hyperpolymath.cloud-sync-tray.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.hyperpolymath.cloud-sync-tray.plist
+
+macFUSE is required for FUSE mounts. After installation, reboot and allow
+the kernel extension in System Preferences > Security & Privacy.
+"

@@ -1,0 +1,29 @@
+Source: cloud-sync-tuner
+Section: utils
+Priority: optional
+Maintainer: hyperpolymath <hyperpolymath@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13), gnat, gprbuild, rustc, cargo, libfuse3-dev
+Standards-Version: 4.6.2
+Homepage: https://github.com/hyperpolymath/cloud-sync-tuner
+Vcs-Git: https://github.com/hyperpolymath/cloud-sync-tuner.git
+Vcs-Browser: https://github.com/hyperpolymath/cloud-sync-tuner
+Rules-Requires-Root: no
+
+Package: cloud-sync-tuner
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, rclone, fuse3
+Recommends: systemd, libnotify-bin
+Suggests: nautilus-python, selinux-utils, auditd
+Description: Ada TUI for managing rclone cloud mounts with rate limiting
+ Cloud Sync Tuner provides an interactive terminal interface for
+ configuring rclone cloud mounts with optimal rate limiting settings.
+ It generates systemd service files with appropriate VFS cache modes
+ to prevent API rate limiting from cloud providers like Dropbox.
+ .
+ Features include:
+  - TUI for cache mode selection (off, minimal, writes, full)
+  - Rate limiting configuration optimized per provider
+  - Smart sync with bandwidth scheduling
+  - SELinux policy for enterprise security
+  - Desktop integration (Nautilus, Dolphin)
+  - System tray daemon with notifications

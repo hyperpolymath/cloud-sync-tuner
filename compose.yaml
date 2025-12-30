@@ -1,0 +1,87 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Cloud Sync Tuner - Container Compose
+# Works with: docker compose, podman-compose, nerdctl compose
+
+name: cloud-sync-tuner
+
+services:
+  cloud-sync-tuner:
+    image: ghcr.io/hyperpolymath/cloud-sync-tuner:1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloud-sync-tuner
+    stdin_open: true
+    tty: true
+    privileged: true  # Required for FUSE
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse:/dev/fuse
+    security_opt:
+      - apparmor:unconfined  # Required for FUSE on some systems
+    volumes:
+      - ${HOME}/.config/rclone:/home/sync/.config/rclone:ro
+      - ${HOME}/.cache/rclone:/home/sync/.cache/rclone
+      - cloud-data:/mnt/cloud:shared
+      - ./config:/etc/cloud-sync-tuner:ro
+    environment:
+      - RCLONE_CONFIG=/home/sync/.config/rclone/rclone.conf
+      - RCLONE_VERBOSE=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "cloud-sync-status", "--json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: aria2 for accelerated downloads
+  aria2:
+    image: p3terx/aria2-pro:latest
+    container_name: cloud-sync-aria2
+    profiles:
+      - accelerated
+    ports:
+      - "6800:6800"
+      - "6888:6888"
+      - "6888:6888/udp"
+    volumes:
+      - aria2-config:/config
+      - cloud-data:/downloads:shared
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - RPC_SECRET=${ARIA2_SECRET:-changeme}
+    restart: unless-stopped
+
+  # Optional: WireGuard VPN for SDP
+  wireguard:
+    image: lscr.io/linuxserver/wireguard:latest
+    container_name: cloud-sync-vpn
+    profiles:
+      - vpn
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - wireguard-config:/config
+      - /lib/modules:/lib/modules:ro
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
+
+volumes:
+  cloud-data:
+    driver: local
+  aria2-config:
+    driver: local
+  wireguard-config:
+    driver: local
+
+networks:
+  default:
+    driver: bridge

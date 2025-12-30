@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+export DH_VERBOSE = 1
+export CARGO_HOME = $(CURDIR)/debian/.cargo
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	gprbuild -P cloud_sync_tuner.gpr -XBUILD_MODE=release
+	cd overlay-daemon && cargo build --release
+	cd tray-daemon && cargo build --release
+
+override_dh_auto_install:
+	install -Dm755 bin/cloud_sync_tuner debian/cloud-sync-tuner/usr/bin/cloud-sync-tuner
+	install -Dm755 overlay-daemon/target/release/cloud-sync-overlay debian/cloud-sync-tuner/usr/bin/cloud-sync-overlay
+	install -Dm755 tray-daemon/target/release/cloud-sync-tray debian/cloud-sync-tuner/usr/bin/cloud-sync-tray
+	install -Dm755 scripts/cloud-sync-status debian/cloud-sync-tuner/usr/bin/cloud-sync-status
+	install -Dm644 man/cloud-sync-tuner.1 debian/cloud-sync-tuner/usr/share/man/man1/cloud-sync-tuner.1
+	dh_installsystemduser
+
+override_dh_auto_test:
+	gprbuild -P tests/tests.gpr
+	./bin/test_runner
+	./bin/verify_formal

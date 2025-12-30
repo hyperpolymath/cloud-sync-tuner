@@ -1,0 +1,108 @@
+# Maintainer: hyperpolymath <hyperpolymath@users.noreply.github.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+pkgname=cloud-sync-tuner
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Ada TUI for managing rclone cloud mount configurations with rate limiting and SELinux support'
+arch=('x86_64' 'i686' 'aarch64')
+url='https://github.com/hyperpolymath/cloud-sync-tuner'
+license=('AGPL-3.0-or-later')
+depends=('rclone' 'fuse3' 'glibc')
+makedepends=('gnat' 'gprbuild' 'rust' 'cargo')
+optdepends=(
+    'systemd: for user service management'
+    'libnotify: for desktop notifications'
+    'nautilus: for GNOME Files sync status emblems'
+    'dolphin: for KDE file manager integration'
+    'selinux-utils: for SELinux policy installation'
+    'audit: for enterprise compliance logging'
+)
+provides=('cloud-sync-tuner')
+conflicts=('cloud-sync-tuner-git')
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/hyperpolymath/${pkgname}/archive/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "${pkgname}-${pkgver}"
+
+    # Build Ada TUI
+    gprbuild -P cloud_sync_tuner.gpr -XBUILD_MODE=release
+
+    # Build Rust overlay daemon
+    cd overlay-daemon
+    cargo build --release
+    cd ..
+
+    # Build Rust tray daemon
+    cd tray-daemon
+    cargo build --release
+    cd ..
+}
+
+check() {
+    cd "${pkgname}-${pkgver}"
+
+    # Run Ada tests
+    gprbuild -P tests/tests.gpr
+    ./bin/test_runner
+    ./bin/verify_formal
+}
+
+package() {
+    cd "${pkgname}-${pkgver}"
+
+    # Install main binary
+    install -Dm755 "bin/cloud_sync_tuner" "${pkgdir}/usr/bin/cloud-sync-tuner"
+
+    # Install Rust daemons
+    install -Dm755 "overlay-daemon/target/release/cloud-sync-overlay" "${pkgdir}/usr/bin/cloud-sync-overlay"
+    install -Dm755 "tray-daemon/target/release/cloud-sync-tray" "${pkgdir}/usr/bin/cloud-sync-tray"
+
+    # Install health check script
+    install -Dm755 "scripts/cloud-sync-status" "${pkgdir}/usr/bin/cloud-sync-status"
+
+    # Install systemd user services
+    install -Dm644 "systemd/rclone-dropbox.service" "${pkgdir}/usr/lib/systemd/user/rclone-dropbox.service"
+    install -Dm644 "systemd/cloud-sync-watchdog.service" "${pkgdir}/usr/lib/systemd/user/cloud-sync-watchdog.service"
+    install -Dm644 "systemd/cloud-sync-watchdog.timer" "${pkgdir}/usr/lib/systemd/user/cloud-sync-watchdog.timer"
+    install -Dm644 "overlay-daemon/cloud-sync-overlay.service" "${pkgdir}/usr/lib/systemd/user/cloud-sync-overlay.service"
+    install -Dm644 "tray-daemon/cloud-sync-tray.service" "${pkgdir}/usr/lib/systemd/user/cloud-sync-tray.service"
+
+    # Install config example
+    install -Dm644 "config/config.toml.example" "${pkgdir}/usr/share/cloud-sync-tuner/config.toml.example"
+    install -Dm644 "config/schema.ncl" "${pkgdir}/usr/share/cloud-sync-tuner/schema.ncl"
+
+    # Install Nautilus extension
+    install -Dm644 "nautilus-extension/cloud_sync_overlay.py" "${pkgdir}/usr/share/nautilus-python/extensions/cloud_sync_overlay.py"
+
+    # Install Dolphin service menu
+    install -Dm644 "dolphin-extension/cloud_sync_overlay.desktop" "${pkgdir}/usr/share/kservices5/ServiceMenus/cloud_sync_overlay.desktop"
+
+    # Install SELinux policy sources (user can compile if needed)
+    install -Dm644 "selinux/cloud_sync_tuner.te" "${pkgdir}/usr/share/cloud-sync-tuner/selinux/cloud_sync_tuner.te"
+    install -Dm644 "selinux/cloud_sync_tuner.fc" "${pkgdir}/usr/share/cloud-sync-tuner/selinux/cloud_sync_tuner.fc"
+    install -Dm644 "selinux/cloud_sync_tuner.if" "${pkgdir}/usr/share/cloud-sync-tuner/selinux/cloud_sync_tuner.if"
+    install -Dm644 "selinux/Makefile" "${pkgdir}/usr/share/cloud-sync-tuner/selinux/Makefile"
+
+    # Install audit rules
+    install -Dm644 "audit/cloud-sync-tuner.rules" "${pkgdir}/usr/share/cloud-sync-tuner/audit/cloud-sync-tuner.rules"
+
+    # Install man page
+    install -Dm644 "man/cloud-sync-tuner.1" "${pkgdir}/usr/share/man/man1/cloud-sync-tuner.1"
+
+    # Install documentation
+    install -Dm644 "README.adoc" "${pkgdir}/usr/share/doc/${pkgname}/README.adoc"
+    install -Dm644 "SECURITY-REVIEW.md" "${pkgdir}/usr/share/doc/${pkgname}/SECURITY-REVIEW.md"
+    install -Dm644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+
+post_install() {
+    echo ":: To enable cloud sync services for your user:"
+    echo "   systemctl --user enable --now cloud-sync-watchdog.timer"
+    echo "   systemctl --user enable --now cloud-sync-overlay.service"
+    echo "   systemctl --user enable --now cloud-sync-tray.service"
+    echo ""
+    echo ":: Copy example config to ~/.config/cloud-sync-tuner/config.toml"
+    echo ":: For SELinux: cd /usr/share/cloud-sync-tuner/selinux && sudo make install"
+    echo ":: For audit: sudo cp /usr/share/cloud-sync-tuner/audit/*.rules /etc/audit/rules.d/"
+}

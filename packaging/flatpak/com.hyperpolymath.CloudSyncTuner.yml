@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+app-id: com.hyperpolymath.CloudSyncTuner
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+command: cloud-sync-tuner
+
+finish-args:
+  - --share=network
+  - --filesystem=home
+  - --filesystem=/run/media:ro
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.FileManager1
+  - --socket=session-bus
+  - --device=fuse
+
+modules:
+  - name: gnat
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 gnat /app/bin/gnat
+    sources:
+      - type: archive
+        url: https://github.com/alire-project/GNAT-FSF-builds/releases/download/gnat-13.2.0-1/gnat-x86_64-linux-13.2.0-1.tar.gz
+        sha256: PLACEHOLDER
+
+  - name: gprbuild
+    buildsystem: simple
+    build-commands:
+      - make prefix=/app install
+    sources:
+      - type: archive
+        url: https://github.com/AdaCore/gprbuild/archive/v24.0.0.tar.gz
+        sha256: PLACEHOLDER
+
+  - name: rclone
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 rclone /app/bin/rclone
+    sources:
+      - type: archive
+        url: https://downloads.rclone.org/v1.68.2/rclone-v1.68.2-linux-amd64.zip
+        sha256: PLACEHOLDER
+
+  - name: cloud-sync-tuner
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/rust-stable/bin
+    build-commands:
+      - gprbuild -P cloud_sync_tuner.gpr -XBUILD_MODE=release
+      - cd overlay-daemon && cargo build --release && cd ..
+      - cd tray-daemon && cargo build --release && cd ..
+      - install -Dm755 bin/cloud_sync_tuner /app/bin/cloud-sync-tuner
+      - install -Dm755 overlay-daemon/target/release/cloud-sync-overlay /app/bin/cloud-sync-overlay
+      - install -Dm755 tray-daemon/target/release/cloud-sync-tray /app/bin/cloud-sync-tray
+      - install -Dm755 scripts/cloud-sync-status /app/bin/cloud-sync-status
+      - install -Dm644 man/cloud-sync-tuner.1 /app/share/man/man1/cloud-sync-tuner.1
+      - install -Dm644 config/config.toml.example /app/share/cloud-sync-tuner/config.toml.example
+    sources:
+      - type: git
+        url: https://github.com/hyperpolymath/cloud-sync-tuner.git
+        tag: v1.0.0
