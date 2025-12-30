@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# auditd rules for cloud-sync-tuner
+# Enterprise compliance logging for cloud file access
+
+# Rule identification key
+-k cloud-sync
+
+########################################
+# Monitor rclone binary execution
+########################################
+-w /home/hyper/.local/bin/rclone -p x -k cloud-sync-exec
+-w /usr/bin/rclone -p x -k cloud-sync-exec
+
+########################################
+# Monitor configuration changes
+########################################
+-w /home/hyper/.config/rclone/rclone.conf -p wa -k cloud-sync-config
+-w /home/hyper/.config/cloud-sync-tuner/ -p wa -k cloud-sync-config
+
+########################################
+# Monitor mount point access
+# Note: Excessive logging may occur - tune for your needs
+########################################
+
+# Dropbox mount - file modifications only (not reads)
+-w /run/media/hyper/eclipse/Cloud/Dropbox -p wa -k cloud-sync-dropbox
+
+# Google Drive mount - file modifications only
+-w /run/media/hyper/eclipse/Cloud/GoogleDrive -p wa -k cloud-sync-gdrive
+
+# OneDrive mount - file modifications only
+-w /run/media/hyper/eclipse/Cloud/OneDrive -p wa -k cloud-sync-onedrive
+
+########################################
+# Monitor cache directory for debugging
+# Uncomment for troubleshooting only
+########################################
+# -w /home/hyper/.cache/rclone -p wa -k cloud-sync-cache
+
+########################################
+# Monitor offline sync directory
+########################################
+-w /home/hyper/Offline -p wa -k cloud-sync-offline
+
+########################################
+# Monitor systemd service changes
+########################################
+-w /home/hyper/.config/systemd/user/rclone-dropbox.service -p wa -k cloud-sync-service
+-w /home/hyper/.config/systemd/user/rclone-gdrive.service -p wa -k cloud-sync-service
+-w /home/hyper/.config/systemd/user/rclone-onedrive.service -p wa -k cloud-sync-service
+
+########################################
+# Monitor credential access
+########################################
+-w /home/hyper/.config/rclone/rclone.conf -p r -k cloud-sync-cred-access
+
+########################################
+# FUSE device access
+########################################
+-a always,exit -F arch=b64 -S open,openat -F path=/dev/fuse -k cloud-sync-fuse

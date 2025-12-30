@@ -220,6 +220,57 @@ This tool complements https://github.com/hyperpolymath/laminar[laminar] for clou
 |Android |- |✓ |✓ |- |No mounts, remote ops only
 |===
 
+== v1.0 Features
+
+=== Smart Sync
+
+[cols="1,2"]
+|===
+|Feature |Description
+
+|Cache size limits |Auto-evict old files when cache exceeds threshold
+|Min free space |Emergency eviction when disk runs low
+|Write-back buffering |Buffer writes locally before uploading
+|Pinned folders |Mark folders for offline access (like native clients)
+|Bandwidth scheduling |Time-based bandwidth limits
+|Conflict resolution |Configurable strategy (newer/older/larger/path1)
+|===
+
+=== Desktop Integration
+
+* **System tray daemon** (`cloud-sync-tray`) - Real-time sync status icon
+* **Nautilus extension** - Sync status emblems in GNOME Files
+* **Dolphin service menu** - Context menu actions in KDE
+* **Desktop notifications** - Alerts for sync events
+
+=== Enterprise Features
+
+* **SELinux policy** - Confined `rclone_t` domain
+* **Auditd rules** - File access logging for compliance
+* **Health check** - `cloud-sync-status` command for monitoring
+* **Watchdog timer** - Automatic service recovery
+
+=== Just Recipes
+
+[source,bash]
+----
+just cookbook-dropbox-fix      # Fix Dropbox rate limiting
+just cookbook-offline-setup    # Setup offline folders
+just cookbook-max-performance  # Maximum caching
+just cookbook-enterprise       # Enable SELinux + audit
+----
+
+== Installation (v1.0)
+
+[source,bash]
+----
+git clone https://github.com/hyperpolymath/cloud-sync-tuner
+cd cloud-sync-tuner
+just install
+----
+
+See `justfile` for all available recipes.
+
 == License
 
 AGPL-3.0-or-later

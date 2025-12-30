@@ -1,0 +1,191 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SELinux Interface definitions for cloud-sync-tuner
+
+########################################
+## <summary>
+##   Execute rclone in the rclone domain.
+## </summary>
+## <param name="domain">
+##   <summary>
+##   Domain allowed to transition.
+##   </summary>
+## </param>
+#
+interface(`rclone_domtrans',`
+    gen_require(`
+        type rclone_t, rclone_exec_t;
+    ')
+
+    corecmd_search_bin($1)
+    domtrans_pattern($1, rclone_exec_t, rclone_t)
+')
+
+########################################
+## <summary>
+##   Execute rclone in the caller domain.
+## </summary>
+## <param name="domain">
+##   <summary>
+##   Domain allowed to execute rclone.
+##   </summary>
+## </param>
+#
+interface(`rclone_exec',`
+    gen_require(`
+        type rclone_exec_t;
+    ')
+
+    corecmd_search_bin($1)
+    can_exec($1, rclone_exec_t)
+')
+
+########################################
+## <summary>
+##   Read rclone configuration files.
+## </summary>
+## <param name="domain">
+##   <summary>
+##   Domain allowed access.
+##   </summary>
+## </param>
+#
+interface(`rclone_read_config',`
+    gen_require(`
+        type rclone_config_t;
+    ')
+
+    allow $1 rclone_config_t:dir list_dir_perms;
+    allow $1 rclone_config_t:file read_file_perms;
+')
+
+########################################
+## <summary>
+##   Read rclone cache files.
+## </summary>
+## <param name="domain">
+##   <summary>
+##   Domain allowed access.
+##   </summary>
+## </param>
+#
+interface(`rclone_read_cache',`
+    gen_require(`
+        type rclone_cache_t;
+    ')
+
+    allow $1 rclone_cache_t:dir list_dir_perms;
+    allow $1 rclone_cache_t:file read_file_perms;
+')
+
+########################################
+## <summary>
+##   Read and write rclone cache files.
+## </summary>
+## <param name="domain">
+##   <summary>
+##   Domain allowed access.
+##   </summary>
+## </param>
+#
+interface(`rclone_manage_cache',`
+    gen_require(`
+        type rclone_cache_t;
+    ')
+
+    allow $1 rclone_cache_t:dir manage_dir_perms;
+    allow $1 rclone_cache_t:file manage_file_perms;
+')
+
+########################################
+## <summary>
+##   Read rclone mount point files.
+## </summary>
+## <param name="domain">
+##   <summary>
+##   Domain allowed access.
+##   </summary>
+## </param>
+#
+interface(`rclone_read_mount',`
+    gen_require(`
+        type rclone_mount_t;
+    ')
+
+    allow $1 rclone_mount_t:dir list_dir_perms;
+    allow $1 rclone_mount_t:file read_file_perms;
+    allow $1 rclone_mount_t:lnk_file read_lnk_file_perms;
+')
+
+########################################
+## <summary>
+##   Read and write rclone mount point files.
+## </summary>
+## <param name="domain">
+##   <summary>
+##   Domain allowed access.
+##   </summary>
+## </param>
+#
+interface(`rclone_manage_mount',`
+    gen_require(`
+        type rclone_mount_t;
+    ')
+
+    allow $1 rclone_mount_t:dir manage_dir_perms;
+    allow $1 rclone_mount_t:file manage_file_perms;
+    allow $1 rclone_mount_t:lnk_file manage_lnk_file_perms;
+')
+
+########################################
+## <summary>
+##   Connect to rclone RC socket.
+## </summary>
+## <param name="domain">
+##   <summary>
+##   Domain allowed access.
+##   </summary>
+## </param>
+#
+interface(`rclone_connect_rc',`
+    gen_require(`
+        type rclone_var_run_t;
+    ')
+
+    allow $1 rclone_var_run_t:sock_file write;
+    allow $1 rclone_t:unix_stream_socket connectto;
+')
+
+########################################
+## <summary>
+##   All of the rules required to
+##   administrate an rclone environment.
+## </summary>
+## <param name="domain">
+##   <summary>
+##   Domain allowed access.
+##   </summary>
+## </param>
+## <param name="role">
+##   <summary>
+##   Role allowed access.
+##   </summary>
+## </param>
+#
+interface(`rclone_admin',`
+    gen_require(`
+        type rclone_t, rclone_cache_t, rclone_config_t;
+        type rclone_mount_t, rclone_log_t, rclone_var_run_t;
+    ')
+
+    allow $1 rclone_t:process { ptrace signal_perms };
+    ps_process_pattern($1, rclone_t)
+
+    files_search_etc($1)
+    admin_pattern($1, rclone_config_t)
+
+    files_search_var($1)
+    admin_pattern($1, rclone_cache_t)
+    admin_pattern($1, rclone_mount_t)
+    admin_pattern($1, rclone_log_t)
+    admin_pattern($1, rclone_var_run_t)
+')

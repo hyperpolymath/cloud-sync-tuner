@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SELinux File Contexts for cloud-sync-tuner
+
+# Executables
+/home/[^/]+/\.local/bin/rclone                    -- gen_context(system_u:object_r:rclone_exec_t,s0)
+/usr/bin/rclone                                   -- gen_context(system_u:object_r:rclone_exec_t,s0)
+/home/[^/]+/\.local/bin/cloud-sync-overlay        -- gen_context(system_u:object_r:cloud_sync_overlay_exec_t,s0)
+/home/[^/]+/\.local/bin/cloud-sync-tuner          -- gen_context(system_u:object_r:bin_t,s0)
+
+# Configuration
+/home/[^/]+/\.config/rclone(/.*)?                    gen_context(system_u:object_r:rclone_config_t,s0)
+/home/[^/]+/\.config/cloud-sync-tuner(/.*)?          gen_context(system_u:object_r:rclone_config_t,s0)
+
+# Cache directories
+/home/[^/]+/\.cache/rclone(/.*)?                     gen_context(system_u:object_r:rclone_cache_t,s0)
+/run/user/[0-9]+/rclone(/.*)?                        gen_context(system_u:object_r:rclone_cache_t,s0)
+
+# VFS cache (user configurable location)
+/run/media/hyper/eclipse/\.rclone-cache(/.*)?        gen_context(system_u:object_r:rclone_cache_t,s0)
+
+# Mount points
+/run/media/hyper/eclipse/Cloud(/.*)?                 gen_context(system_u:object_r:rclone_mount_t,s0)
+/run/media/hyper/eclipse/Cloud/Dropbox(/.*)?         gen_context(system_u:object_r:rclone_mount_t,s0)
+/run/media/hyper/eclipse/Cloud/GoogleDrive(/.*)?     gen_context(system_u:object_r:rclone_mount_t,s0)
+/run/media/hyper/eclipse/Cloud/OneDrive(/.*)?        gen_context(system_u:object_r:rclone_mount_t,s0)
+
+# Offline sync directory
+/home/[^/]+/Offline(/.*)?                            gen_context(system_u:object_r:rclone_mount_t,s0)
+
+# Log files
+/home/[^/]+/\.local/share/cloud-sync-tuner/logs(/.*)? gen_context(system_u:object_r:rclone_log_t,s0)
+/var/log/rclone(/.*)?                                gen_context(system_u:object_r:rclone_log_t,s0)
+
+# Runtime files
+/run/user/[0-9]+/rclone\.sock                     -- gen_context(system_u:object_r:rclone_var_run_t,s0)
+/run/user/[0-9]+/cloud-sync-overlay\.sock         -- gen_context(system_u:object_r:rclone_var_run_t,s0)

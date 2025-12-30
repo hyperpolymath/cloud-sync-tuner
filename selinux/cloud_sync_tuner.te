@@ -1,0 +1,139 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SELinux Type Enforcement policy for cloud-sync-tuner
+# Confines rclone mount daemon to prevent privilege escalation
+
+policy_module(cloud_sync_tuner, 1.0.0)
+
+########################################
+# Type Definitions
+########################################
+
+# Process domains
+type rclone_t;
+type rclone_exec_t;
+type cloud_sync_overlay_t;
+type cloud_sync_overlay_exec_t;
+
+# File contexts
+type rclone_cache_t;
+type rclone_config_t;
+type rclone_mount_t;
+type rclone_log_t;
+
+# Runtime
+type rclone_var_run_t;
+
+########################################
+# Domain Transitions
+########################################
+
+# Allow systemd to start rclone
+init_daemon_domain(rclone_t, rclone_exec_t)
+
+# Allow systemd to start overlay daemon
+init_daemon_domain(cloud_sync_overlay_t, cloud_sync_overlay_exec_t)
+
+########################################
+# rclone_t Domain Policy
+########################################
+
+# Basic process permissions
+allow rclone_t self:process { signal_perms getsched setsched };
+allow rclone_t self:fifo_file rw_fifo_file_perms;
+allow rclone_t self:unix_stream_socket create_stream_socket_perms;
+allow rclone_t self:unix_dgram_socket create_socket_perms;
+allow rclone_t self:netlink_route_socket { create bind getattr read write nlmsg_read };
+
+# Configuration files (read-only)
+allow rclone_t rclone_config_t:dir list_dir_perms;
+allow rclone_t rclone_config_t:file read_file_perms;
+
+# Cache directory (read-write)
+allow rclone_t rclone_cache_t:dir manage_dir_perms;
+allow rclone_t rclone_cache_t:file manage_file_perms;
+
+# Mount points (FUSE operations)
+allow rclone_t rclone_mount_t:dir manage_dir_perms;
+allow rclone_t rclone_mount_t:file manage_file_perms;
+allow rclone_t rclone_mount_t:lnk_file manage_lnk_file_perms;
+allow rclone_t rclone_mount_t:filesystem { mount unmount };
+
+# Log files
+allow rclone_t rclone_log_t:dir add_entry_dir_perms;
+allow rclone_t rclone_log_t:file { create open write append getattr };
+
+# PID/socket files
+allow rclone_t rclone_var_run_t:dir manage_dir_perms;
+allow rclone_t rclone_var_run_t:file manage_file_perms;
+allow rclone_t rclone_var_run_t:sock_file manage_sock_file_perms;
+
+# Network access (HTTPS to cloud providers)
+corenet_tcp_connect_http_port(rclone_t)
+corenet_tcp_connect_https_port(rclone_t)
+
+# DNS resolution
+sysnet_dns_name_resolve(rclone_t)
+
+# FUSE device access
+allow rclone_t fuse_device_t:chr_file { read write open ioctl };
+
+# Systemd notify socket
+allow rclone_t init_t:unix_dgram_socket sendto;
+
+# Read /proc/self for monitoring
+allow rclone_t proc_t:file { read getattr };
+
+# Kernel parameters (read-only)
+kernel_read_system_state(rclone_t)
+
+# Deny dangerous operations
+dontaudit rclone_t self:capability { net_admin sys_admin };
+dontaudit rclone_t shadow_t:file read;
+dontaudit rclone_t etc_t:file write;
+
+########################################
+# cloud_sync_overlay_t Domain Policy
+########################################
+
+# Basic process permissions
+allow cloud_sync_overlay_t self:process signal_perms;
+allow cloud_sync_overlay_t self:fifo_file rw_fifo_file_perms;
+allow cloud_sync_overlay_t self:unix_stream_socket create_stream_socket_perms;
+
+# D-Bus access
+allow cloud_sync_overlay_t system_dbusd_t:dbus { send_msg acquire_svc };
+allow cloud_sync_overlay_t session_dbusd_t:dbus { send_msg acquire_svc };
+allow cloud_sync_overlay_t self:dbus send_msg;
+
+# Read rclone config and status
+allow cloud_sync_overlay_t rclone_config_t:file read_file_perms;
+allow cloud_sync_overlay_t rclone_var_run_t:sock_file { read write };
+
+# Connect to rclone RC interface (localhost)
+corenet_tcp_connect_all_unreserved_ports(cloud_sync_overlay_t)
+
+# GIO metadata access
+userdom_manage_user_home_content_files(cloud_sync_overlay_t)
+
+# Read mount points for status
+allow cloud_sync_overlay_t rclone_mount_t:dir list_dir_perms;
+allow cloud_sync_overlay_t rclone_mount_t:file read_file_perms;
+
+########################################
+# Boolean Tunables
+########################################
+
+## Allow rclone to use all network ports
+gen_tunable(rclone_connect_any_port, false)
+
+## Allow rclone to run in debugging mode
+gen_tunable(rclone_debug_mode, false)
+
+if (rclone_connect_any_port) {
+    corenet_tcp_connect_all_ports(rclone_t)
+}
+
+if (rclone_debug_mode) {
+    allow rclone_t rclone_log_t:file manage_file_perms;
+    logging_send_syslog_msg(rclone_t)
+}

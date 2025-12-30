@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[package]
+name = "cloud-sync-tray"
+version = "1.0.0"
+edition = "2021"
+description = "System tray daemon for cloud-sync-tuner status"
+license = "AGPL-3.0-or-later"
+authors = ["hyperpolymath"]
+repository = "https://github.com/hyperpolymath/cloud-sync-tuner"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+tray-icon = "0.14"
+muda = "0.13"
+tao = { version = "0.28", default-features = false, features = ["linux"] }
+image = "0.25"
+notify-rust = "4"
+reqwest = { version = "0.12", features = ["json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+xdg = "2.5"
+
+[profile.release]
+lto = true
+strip = true

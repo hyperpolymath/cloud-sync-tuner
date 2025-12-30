@@ -1,0 +1,49 @@
+#!/bin/bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Laminar CI job for cloud-sync-tuner
+# Place in /var/lib/laminar/cfg/jobs/
+
+set -euo pipefail
+
+echo "=== Cloud Sync Tuner CI ==="
+echo "Commit: ${GIT_COMMIT:-unknown}"
+echo "Branch: ${GIT_BRANCH:-unknown}"
+echo ""
+
+# Checkout
+cd "$WORKSPACE"
+git fetch --all
+git checkout "${GIT_COMMIT:-HEAD}"
+
+# Build
+echo "=== Building ==="
+just build
+
+# Lint
+echo "=== Linting ==="
+just lint
+
+# Test
+echo "=== Testing ==="
+just test
+
+# Security scan
+echo "=== Security Scan ==="
+if command -v cargo-audit &>/dev/null; then
+    cd overlay-daemon && cargo audit
+    cd ../tray-daemon && cargo audit
+    cd ..
+fi
+
+# Build SELinux policy (don't fail if selinux-devel missing)
+echo "=== SELinux Policy ==="
+just build-selinux || echo "SELinux build skipped (missing deps)"
+
+# Package
+echo "=== Packaging ==="
+VERSION=$(grep -oP 'Version : constant String := "\K[^"]+' src/cloud_sync_tuner.adb)
+just release "$VERSION"
+
+echo ""
+echo "=== CI Complete ==="
+echo "Artifact: dist/cloud-sync-tuner-${VERSION}.tar.gz"

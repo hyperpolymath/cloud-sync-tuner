@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Unit]
+Description=Cloud Sync System Tray Daemon
+Documentation=https://github.com/hyperpolymath/cloud-sync-tuner
+After=graphical-session.target
+PartOf=graphical-session.target
+Wants=rclone-dropbox.service rclone-gdrive.service rclone-onedrive.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/cloud-sync-tray
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/share
+PrivateTmp=true
+
+# Desktop environment integration
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=graphical-session.target

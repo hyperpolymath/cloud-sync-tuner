@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Unit]
+Description=Cloud Sync Watchdog Timer - Periodic Health Check
+Documentation=https://github.com/hyperpolymath/cloud-sync-tuner
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

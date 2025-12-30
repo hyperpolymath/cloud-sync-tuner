@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Dolphin overlay icon service file
+# Install to: ~/.local/share/kservices5/ServiceMenus/
+[Desktop Entry]
+Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
+MimeType=all/allfiles;inode/directory;
+Actions=PinOffline;FreeSpace;SyncNow;
+
+X-KDE-Priority=TopLevel
+X-KDE-Submenu=Cloud Sync
+
+[Desktop Action PinOffline]
+Name=Make Available Offline
+Icon=emblem-favorite
+Exec=cloud-sync-tuner --pin "%F"
+
+[Desktop Action FreeSpace]
+Name=Free Up Space
+Icon=emblem-shared
+Exec=cloud-sync-tuner --unpin "%F"
+
+[Desktop Action SyncNow]
+Name=Sync Now
+Icon=emblem-synchronizing
+Exec=cloud-sync-tuner --sync-now "%F"

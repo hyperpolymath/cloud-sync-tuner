@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Unit]
+Description=Cloud Sync Overlay Icon Daemon
+Documentation=https://github.com/hyperpolymath/cloud-sync-tuner
+After=graphical-session.target
+Wants=rclone-dropbox.service rclone-gdrive.service rclone-onedrive.service
+
+[Service]
+Type=dbus
+BusName=org.cloudsynctune.Overlay1
+ExecStart=%h/.local/bin/cloud-sync-overlay
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+
+[Install]
+WantedBy=graphical-session.target

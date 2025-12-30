@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[Unit]
+Description=Cloud Sync Watchdog - Error Recovery
+Documentation=https://github.com/hyperpolymath/cloud-sync-tuner
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c '\
+    for svc in rclone-dropbox rclone-gdrive rclone-onedrive; do \
+        if systemctl --user is-active --quiet "$svc.service" 2>/dev/null; then \
+            continue; \
+        fi; \
+        if systemctl --user is-enabled --quiet "$svc.service" 2>/dev/null; then \
+            echo "Restarting $svc..."; \
+            systemctl --user start "$svc.service" || true; \
+            if command -v notify-send >/dev/null 2>&1; then \
+                notify-send -u normal "Cloud Sync" "Restarted $svc after failure"; \
+            fi; \
+        fi; \
+    done'
+
+# Notify on completion
+ExecStopPost=/bin/bash -c '\
+    if [[ "$EXIT_STATUS" -ne 0 ]] && command -v notify-send >/dev/null 2>&1; then \
+        notify-send -u critical "Cloud Sync Watchdog" "Service recovery failed"; \
+    fi'
