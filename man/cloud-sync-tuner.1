@@ -1,0 +1,133 @@
+.\" SPDX-License-Identifier: AGPL-3.0-or-later
+.TH CLOUD-SYNC-TUNER 1 "December 2025" "cloud-sync-tuner 0.2.0" "User Commands"
+.SH NAME
+cloud-sync-tuner \- configure rclone cloud mounts with rate limiting
+.SH SYNOPSIS
+.B cloud-sync-tuner
+.RI [ OPTIONS ]
+.RI [ MODE ]
+.SH DESCRIPTION
+.B cloud-sync-tuner
+is an Ada TUI for managing rclone cloud mount configurations with optimal
+rate limiting settings. It generates systemd service files with appropriate
+VFS cache modes to prevent API rate limiting from cloud providers like Dropbox.
+.PP
+When run without arguments, it starts an interactive TUI. With a mode argument,
+it generates service files directly.
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Display help message and exit.
+.TP
+.BR \-v ", " \-\-version
+Display version information and exit.
+.TP
+.BI \-\-validate " MODE"
+Validate that MODE is a valid cache mode. Exits with status 0 if valid, 1 if invalid.
+.SH MODES
+.TP
+.B off
+No caching - direct cloud access. Every read/write hits the network.
+Highest API usage, slowest performance, but always sees latest state.
+.TP
+.B minimal
+Caches currently open files only. Reduces some API calls for active files
+but still queries cloud frequently for directory listings.
+.TP
+.B writes
+.RB ( recommended )
+Caches write operations and streams reads. Best balance of performance
+and API usage. Writes are buffered locally then synced. Reads stream
+directly from cloud.
+.TP
+.B full
+Full local caching of all accessed files. Fastest reads for cached files
+but highest disk usage and most API calls at startup. May trigger rate
+limits on providers like Dropbox.
+.SH RATE LIMITING
+Default rate limiting is optimized for Dropbox:
+.IP \(bu 2
+.B \-\-tpslimit 4
+\- Maximum 4 transactions per second
+.IP \(bu 2
+.B \-\-tpslimit-burst 1
+\- No burst allowance
+.IP \(bu 2
+.B \-\-vfs-read-chunk-size 32M
+\- Read in 32MB chunks
+.IP \(bu 2
+.B \-\-vfs-cache-max-age 72h
+\- Cache entries valid for 72 hours
+.IP \(bu 2
+.B \-\-dir-cache-time 5m
+\- Directory listings cached 5 minutes
+.PP
+These can be customized via the TUI [R] option or config file.
+.SH TUI CONTROLS
+.TP
+.B 1-4
+Select cache mode
+.TP
+.B R
+Edit rate limiting configuration
+.TP
+.B A
+Apply configuration (generate service files)
+.TP
+.B ?
+Toggle context-sensitive help
+.TP
+.B Q
+Quit
+.SH FILES
+.TP
+.I ~/.config/cloud-sync-tuner/config.toml
+Main configuration file defining services, mount points, and rate limits.
+.TP
+.I /tmp/cloud-sync-tuner/output/
+Generated systemd service files.
+.TP
+.I ~/.config/systemd/user/rclone-*.service
+Installed service files (copy from output directory).
+.SH EXAMPLES
+.TP
+Interactive TUI:
+.B cloud-sync-tuner
+.TP
+Generate writes mode services directly:
+.B cloud-sync-tuner writes
+.TP
+Validate a mode:
+.B cloud-sync-tuner --validate full
+.TP
+Apply generated services:
+.nf
+cp /tmp/cloud-sync-tuner/output/*.service ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user restart rclone-dropbox
+.fi
+.SH EXIT STATUS
+.TP
+.B 0
+Success
+.TP
+.B 1
+Invalid argument or validation failure
+.SH ENVIRONMENT
+.TP
+.B XDG_CONFIG_HOME
+If set, configuration is read from $XDG_CONFIG_HOME/cloud-sync-tuner/
+instead of ~/.config/cloud-sync-tuner/
+.SH SEE ALSO
+.BR rclone (1),
+.BR systemctl (1),
+.BR fusermount (1)
+.PP
+Project homepage: https://github.com/hyperpolymath/cloud-sync-tuner
+.SH BUGS
+Report bugs at https://github.com/hyperpolymath/cloud-sync-tuner/issues
+.SH AUTHOR
+hyperpolymath
+.SH COPYRIGHT
+Copyright \(co 2025 hyperpolymath.
+License: AGPL-3.0-or-later.
