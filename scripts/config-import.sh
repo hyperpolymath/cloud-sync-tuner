@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 # Import cloud-sync-tuner configuration from exported archive
 
 set -euo pipefail
