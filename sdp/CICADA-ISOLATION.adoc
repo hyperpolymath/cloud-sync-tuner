@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: MPL-2.0-or-later
 = Cicada Isolation Architecture
 :toc:
 
@@ -95,7 +95,7 @@ services:
 [source,nft]
 ----
 #!/usr/sbin/nft -f
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: MPL-2.0-or-later
 # Cicada isolation firewall rules
 
 table inet cicada_isolation {
@@ -194,7 +194,7 @@ pub const CicadaClient = struct {
 [source,bash]
 ----
 #!/bin/bash
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: MPL-2.0-or-later
 # verify-cicada-isolation.sh
 
 set -euo pipefail

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: MPL-2.0-or-later
 = Cloud Sync Tuner Roadmap
 :toc:
 :icons: font
@@ -181,7 +181,7 @@ A secure, cross-platform cloud synchronization system with:
 * Identity verification before tunnel
 * Key material isolation
 
-=== gitvisor
+=== git-hud
 
 * Config file version control
 * Automated backup of settings
