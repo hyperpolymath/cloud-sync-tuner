@@ -16,3 +16,6 @@ output/
 # OS
 .DS_Store
 Thumbs.db
+
+# Crash recovery artifacts
+ai-cli-crash-capture/
