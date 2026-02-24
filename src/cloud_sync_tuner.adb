@@ -100,17 +100,17 @@ procedure Cloud_Sync_Tuner is
    Services : constant Service_Array (1 .. 3) := (
       1 => (To_Unbounded_String ("Dropbox"),
             To_Unbounded_String ("dropbox:"),
-            To_Unbounded_String ("/run/media/hyper/eclipse/Cloud/Dropbox"),
+            To_Unbounded_String ("/var/home/hyper/Cloud/Dropbox"),
             To_Unbounded_String ("rclone-dropbox"),
             True),
       2 => (To_Unbounded_String ("Google Drive"),
             To_Unbounded_String ("gdrive:"),
-            To_Unbounded_String ("/run/media/hyper/eclipse/Cloud/GoogleDrive"),
+            To_Unbounded_String ("/var/home/hyper/Cloud/GoogleDrive"),
             To_Unbounded_String ("rclone-gdrive"),
             True),
       3 => (To_Unbounded_String ("OneDrive"),
             To_Unbounded_String ("onedrive:"),
-            To_Unbounded_String ("/run/media/hyper/eclipse/Cloud/OneDrive"),
+            To_Unbounded_String ("/var/home/hyper/Cloud/OneDrive"),
             To_Unbounded_String ("rclone-onedrive"),
             True)
    );
@@ -841,9 +841,9 @@ procedure Cloud_Sync_Tuner is
                delay 1.0;
 
             when 'g' | 'G' =>
-               Smart_Config.TPS_Limit := 8;
-               Smart_Config.TPS_Burst := 2;
-               Smart_Config.Chunk_Size_MB := 64;
+               Smart_Config.TPS_Limit := 4;
+               Smart_Config.TPS_Burst := 1;
+               Smart_Config.Chunk_Size_MB := 32;
                Put_Line (Green & "  Applied Google Drive optimized rate limits" & Reset);
                delay 1.0;
 
@@ -1486,9 +1486,9 @@ procedure Cloud_Sync_Tuner is
                      Smart_Config.TPS_Burst := 1;
                      Smart_Config.Chunk_Size_MB := 32;
                   elsif Preset = "gdrive" then
-                     Smart_Config.TPS_Limit := 8;
-                     Smart_Config.TPS_Burst := 2;
-                     Smart_Config.Chunk_Size_MB := 64;
+                     Smart_Config.TPS_Limit := 4;
+                     Smart_Config.TPS_Burst := 1;
+                     Smart_Config.Chunk_Size_MB := 32;
                   elsif Preset = "onedrive" then
                      Smart_Config.TPS_Limit := 6;
                      Smart_Config.TPS_Burst := 2;
