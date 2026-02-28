@@ -4,6 +4,9 @@ bin/
 *.o
 *.ali
 
+# Rust
+/target/
+
 # Editor
 *~
 *.swp
