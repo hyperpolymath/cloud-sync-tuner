@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Cloud Sync Tuner - Podman/Buildah Containerfile
-# Works with: podman build, buildah bud, nerdctl build
+# Cloud Sync Tuner - Wolfi-based container image
 
 FROM cgr.dev/chainguard/wolfi-base:latest AS builder
 
@@ -41,20 +40,12 @@ COPY --from=builder /build/scripts/cloud-sync-status /usr/bin/
 COPY --from=builder /build/config/config.toml.example /etc/cloud-sync-tuner/config.toml.example
 
 # Create non-root user
-RUN adduser -D -u 1000 tuner
-USER tuner
-WORKDIR /home/tuner
+RUN adduser -D -u 1000 sync
+USER sync
+WORKDIR /home/sync
 
 # FUSE needs /dev/fuse
-VOLUME ["/home/tuner/.config/rclone", "/home/tuner/.cache/rclone", "/mnt/cloud"]
+VOLUME ["/home/sync/.config/rclone", "/home/sync/.cache/rclone", "/mnt/cloud"]
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["cloud-sync-tuner"]
-
-# OCI annotations
-LABEL org.opencontainers.image.title="Cloud Sync Tuner"
-LABEL org.opencontainers.image.description="Ada TUI for managing rclone cloud mounts with rate limiting"
-LABEL org.opencontainers.image.version="1.0.0"
-LABEL org.opencontainers.image.vendor="hyperpolymath"
-LABEL org.opencontainers.image.licenses="AGPL-3.0-or-later"
-LABEL org.opencontainers.image.source="https://github.com/hyperpolymath/cloud-sync-tuner"
