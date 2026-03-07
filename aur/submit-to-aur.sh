@@ -62,6 +62,7 @@ cp "$SCRIPT_DIR/.SRCINFO" .
 echo "Calculating source checksum..."
 SOURCE_URL="https://github.com/hyperpolymath/cloud-sync-tuner/archive/v1.0.0.tar.gz"
 # WARNING: Pipe-to-shell is unsafe — download and verify first
+# WARNING: Pipe-to-shell is unsafe — download and verify first
 CHECKSUM=$(curl -sL "$SOURCE_URL" | sha256sum | awk '{print $1}')
 sed -i "s/sha256sums=('SKIP')/sha256sums=('$CHECKSUM')/" PKGBUILD
 
