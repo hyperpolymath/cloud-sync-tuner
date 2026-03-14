@@ -10,7 +10,7 @@ PublisherSupportUrl: https://github.com/hyperpolymath/cloud-sync-tuner/issues
 Author: hyperpolymath
 PackageName: Cloud Sync Tuner
 PackageUrl: https://github.com/hyperpolymath/cloud-sync-tuner
-License: AGPL-3.0-or-later
+License: PMPL-1.0-or-later
 LicenseUrl: https://github.com/hyperpolymath/cloud-sync-tuner/blob/main/LICENSE
 Copyright: Copyright 2025 hyperpolymath
 ShortDescription: Ada TUI for managing rclone cloud mounts with rate limiting

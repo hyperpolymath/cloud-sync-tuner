@@ -7,7 +7,7 @@ version = "1.0.0"
 authors = ["hyperpolymath"]
 maintainers = ["hyperpolymath <hyperpolymath@users.noreply.github.com>"]
 maintainers-logins = ["hyperpolymath"]
-licenses = "AGPL-3.0-or-later"
+licenses = "PMPL-1.0-or-later"
 website = "https://github.com/hyperpolymath/cloud-sync-tuner"
 tags = ["tui", "rclone", "cloud", "sync", "dropbox", "rate-limiting"]
 

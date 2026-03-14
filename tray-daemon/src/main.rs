@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-License-Identifier: PMPL-1.0-or-later
 //! cloud-sync-tray: System tray daemon for cloud sync status
 //!
 //! Displays sync status in system tray with menu for common actions.

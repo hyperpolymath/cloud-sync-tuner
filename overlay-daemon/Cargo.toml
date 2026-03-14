@@ -4,7 +4,7 @@ name = "cloud-sync-overlay"
 version = "0.1.0"
 edition = "2021"
 description = "File manager overlay icon daemon for rclone cloud mounts"
-license = "AGPL-3.0-or-later"
+license = "PMPL-1.0-or-later"
 authors = ["hyperpolymath"]
 repository = "https://github.com/hyperpolymath/cloud-sync-tuner"
 

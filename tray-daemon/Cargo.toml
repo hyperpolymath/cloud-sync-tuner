@@ -4,7 +4,7 @@ name = "cloud-sync-tray"
 version = "1.0.0"
 edition = "2021"
 description = "System tray daemon for cloud-sync-tuner status"
-license = "AGPL-3.0-or-later"
+license = "PMPL-1.0-or-later"
 authors = ["hyperpolymath"]
 repository = "https://github.com/hyperpolymath/cloud-sync-tuner"
 
