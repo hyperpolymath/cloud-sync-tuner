@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 # Cloud Sync Tuner - Alpine fallback (if Wolfi lacks GNAT)
 # Build with: nerdctl build -f Containerfile.alpine-fallback -t cloud-sync-tuner .
 
@@ -42,4 +42,4 @@ ENTRYPOINT ["/usr/local/bin/cloud_sync_tuner"]
 
 LABEL org.opencontainers.image.title="Cloud Sync Tuner" \
       org.opencontainers.image.source="https://github.com/hyperpolymath/cloud-sync-tuner" \
-      org.opencontainers.image.licenses="AGPL-3.0-or-later"
+      org.opencontainers.image.licenses="PMPL-1.0-or-later"

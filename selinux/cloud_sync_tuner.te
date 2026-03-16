@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 # SELinux Type Enforcement policy for cloud-sync-tuner
 # Confines rclone mount daemon to prevent privilege escalation
 

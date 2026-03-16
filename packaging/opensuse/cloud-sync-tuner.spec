@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 # openSUSE Build Service spec file
 # Install via: zypper install cloud-sync-tuner
 
@@ -6,7 +6,7 @@ Name:           cloud-sync-tuner
 Version:        1.0.0
 Release:        0
 Summary:        Ada TUI for managing rclone cloud mounts with rate limiting
-License:        AGPL-3.0-or-later
+License:        PMPL-1.0-or-later
 Group:          Productivity/File utilities
 URL:            https://github.com/hyperpolymath/cloud-sync-tuner
 Source0:        %{name}-%{version}.tar.gz

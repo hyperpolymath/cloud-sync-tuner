@@ -4,7 +4,7 @@ class CloudSyncTuner < Formula
   homepage "https://github.com/hyperpolymath/cloud-sync-tuner"
   url "https://github.com/hyperpolymath/cloud-sync-tuner/archive/v1.0.0.tar.gz"
   sha256 "PLACEHOLDER"
-  license "AGPL-3.0-or-later"
+  license "PMPL-1.0-or-later"
   head "https://github.com/hyperpolymath/cloud-sync-tuner.git", branch: "main"
 
   depends_on "gprbuild" => :build

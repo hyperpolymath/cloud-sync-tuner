@@ -1,12 +1,12 @@
 # Maintainer: hyperpolymath <hyperpolymath@users.noreply.github.com>
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 pkgname=cloud-sync-tuner
 pkgver=1.0.0
 pkgrel=1
 pkgdesc='Ada TUI for managing rclone cloud mount configurations with rate limiting and SELinux support'
 arch=('x86_64' 'i686' 'aarch64')
 url='https://github.com/hyperpolymath/cloud-sync-tuner'
-license=('AGPL-3.0-or-later')
+license=('PMPL-1.0-or-later')
 depends=('rclone' 'fuse3' 'glibc')
 makedepends=('gnat' 'gprbuild' 'rust' 'cargo')
 optdepends=(
