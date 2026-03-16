@@ -4,6 +4,7 @@
 //! Monitors rclone mount status and provides sync state to file managers
 //! via D-Bus and GIO emblems.
 
+#![forbid(unsafe_code)]
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;

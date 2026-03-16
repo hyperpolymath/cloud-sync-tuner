@@ -3,6 +3,7 @@
 //!
 //! Displays sync status in system tray with menu for common actions.
 
+#![forbid(unsafe_code)]
 use muda::{Menu, MenuEvent, MenuItem, PredefinedMenuItem, Submenu};
 use notify_rust::Notification;
 use serde::Deserialize;
