@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<!-- SPDX-License-Identifier: PMPL-1.0-or-later -->
 <component type="console-application">
   <id>com.hyperpolymath.CloudSyncTuner</id>
   <name>Cloud Sync Tuner</name>

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: PMPL-1.0-or-later
 class CloudSyncTuner < Formula
   desc "Ada TUI for managing rclone cloud mounts with rate limiting"
   homepage "https://github.com/hyperpolymath/cloud-sync-tuner"
