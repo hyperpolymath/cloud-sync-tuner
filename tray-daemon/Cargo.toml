@@ -5,7 +5,7 @@ version = "1.0.0"
 edition = "2021"
 description = "System tray daemon for cloud-sync-tuner status"
 license = "PMPL-1.0-or-later"
-authors = ["hyperpolymath"]
+authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
 repository = "https://github.com/hyperpolymath/cloud-sync-tuner"
 
 [dependencies]

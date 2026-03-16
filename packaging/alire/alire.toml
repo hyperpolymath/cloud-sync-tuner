@@ -4,7 +4,7 @@ name = "cloud_sync_tuner"
 description = "Ada TUI for managing rclone cloud mounts with rate limiting"
 version = "1.0.0"
 
-authors = ["hyperpolymath"]
+authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
 maintainers = ["hyperpolymath <hyperpolymath@users.noreply.github.com>"]
 maintainers-logins = ["hyperpolymath"]
 licenses = "PMPL-1.0-or-later"

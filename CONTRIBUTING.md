@@ -1,13 +1,13 @@
 # Clone the repository
-git clone https://{{FORGE}}/{{OWNER}}/{{REPO}}.git
-cd {{REPO}}
+git clone https://github.com/hyperpolymath/cloud-sync-tuner.git
+cd cloud-sync-tuner
 
 # Using Nix (recommended for reproducibility)
 nix develop
 
 # Or using toolbox/distrobox
-toolbox create {{REPO}}-dev
-toolbox enter {{REPO}}-dev
+toolbox create cloud-sync-tuner-dev
+toolbox enter cloud-sync-tuner-dev
 # Install dependencies manually
 
 # Verify setup
@@ -17,7 +17,7 @@ just test    # Run test suite
 
 ### Repository Structure
 ```
-{{REPO}}/
+cloud-sync-tuner/
 ├── src/                 # Source code (Perimeter 1-2)
 ├── lib/                 # Library code (Perimeter 1-2)
 ├── extensions/          # Extensions (Perimeter 2)
@@ -53,7 +53,7 @@ just test    # Run test suite
 
 **Before reporting**:
 1. Search existing issues
-2. Check if it's already fixed in `{{MAIN_BRANCH}}`
+2. Check if it's already fixed in `main`
 3. Determine which perimeter the bug affects
 
 **When reporting**:
@@ -86,10 +86,10 @@ Use the [feature request template](.github/ISSUE_TEMPLATE/feature_request.md) an
 
 Look for issues labelled:
 
-- [`good first issue`](https://{{FORGE}}/{{OWNER}}/{{REPO}}/labels/good%20first%20issue) — Simple Perimeter 3 tasks
-- [`help wanted`](https://{{FORGE}}/{{OWNER}}/{{REPO}}/labels/help%20wanted) — Community help needed
-- [`documentation`](https://{{FORGE}}/{{OWNER}}/{{REPO}}/labels/documentation) — Docs improvements
-- [`perimeter-3`](https://{{FORGE}}/{{OWNER}}/{{REPO}}/labels/perimeter-3) — Community sandbox scope
+- [`good first issue`](https://github.com/hyperpolymath/cloud-sync-tuner/labels/good%20first%20issue) — Simple Perimeter 3 tasks
+- [`help wanted`](https://github.com/hyperpolymath/cloud-sync-tuner/labels/help%20wanted) — Community help needed
+- [`documentation`](https://github.com/hyperpolymath/cloud-sync-tuner/labels/documentation) — Docs improvements
+- [`perimeter-3`](https://github.com/hyperpolymath/cloud-sync-tuner/labels/perimeter-3) — Community sandbox scope
 
 ---
 
