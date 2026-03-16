@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Clade declaration — part of the gv-clade-index registry
+# See: https://github.com/hyperpolymath/gv-clade-index
+
+[identity]
+uuid = "385cba2f-5949-55fb-a1cb-76f608fdbcc8"
+primary-forge = "github"
+primary-owner = "hyperpolymath"
+canonical-name = "cloud-sync-tuner"
+prefixed-name = "ix-cloud-sync-tuner"
+
+[clade]
+primary = "ix"
+secondary = []
+assigned = "2026-03-16"
+rationale = ""
+
+[forges]
+github = "hyperpolymath/cloud-sync-tuner"
+gitlab = "hyperpolymath/cloud-sync-tuner"
+bitbucket = "hyperpolymath/cloud-sync-tuner"
+
+[lineage]
+type = "standalone"
+parent = "Cloud synchronisation tuning"
+born = "2026-03-16"
