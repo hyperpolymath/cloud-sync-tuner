@@ -1,0 +1,18 @@
+# ⚓ ANCHOR: cloud-sync-tuner
+# This is the canonical authority for the cloud-sync-tuner repository.
+
+id: "org.hyperpolymath.cloud-sync-tuner"
+version: "1.0.0"
+clade: "unknown"
+status: "active"
+
+# SSG Configuration (Unified boj-server build)
+ssg:
+  engine: "casket"
+  output_dir: "public"
+  boj_trigger: true
+  cartridge: "ssg-mcp"
+
+# Relationships
+parents:
+  - "org.hyperpolymath.boj-server"
