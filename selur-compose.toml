@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# Stapeln selur-compose.toml — Cloud Sync Tuner
+# Ada TUI + Rust daemons (overlay + tray), requires FUSE and D-Bus
+
+[project]
+name = "cloud-sync-tuner"
+
+[services.app]
+build = { context = ".", dockerfile = "Containerfile" }
+restart = "unless-stopped"
+networks = ["default"]
+
+volumes = [
+  "rclone-config:/home/sync/.config/rclone",
+  "rclone-cache:/home/sync/.cache/rclone",
+  "cloud-mount:/mnt/cloud",
+]
+
+# Needs /dev/fuse access for FUSE overlay filesystem
+devices = ["/dev/fuse"]
+cap_add = ["SYS_ADMIN"]
+security_opt = ["apparmor:unconfined"]
+
+healthcheck = { test = "cloud-sync-tuner --status || exit 1", interval = "30s", timeout = "5s", start_period = "10s", retries = 3 }
+
+[services.app.labels]
+"org.opencontainers.image.title" = "Cloud Sync Tuner"
+
+# --------------------------------------------------------------------------
+# Volumes (named volumes for persistence across restarts)
+# --------------------------------------------------------------------------
+[volumes.rclone-config]
+[volumes.rclone-cache]
+[volumes.cloud-mount]
+
+[networks.default]
+driver = "bridge"
