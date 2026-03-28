@@ -40,7 +40,7 @@
 ########################################
 # Monitor offline sync directory
 ########################################
--w /home/hyper/Offline -p wa -k cloud-sync-offline
+-w $HOME/Offline -p wa -k cloud-sync-offline
 
 ########################################
 # Monitor systemd service changes

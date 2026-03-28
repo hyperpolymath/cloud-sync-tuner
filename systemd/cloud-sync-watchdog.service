@@ -7,9 +7,9 @@ Documentation=https://github.com/hyperpolymath/cloud-sync-tuner
 Type=oneshot
 ExecStart=/bin/bash -c '\
     declare -A mounts=( \
-        ["rclone-dropbox"]="/var/home/hyper/Cloud/Dropbox" \
-        ["rclone-gdrive"]="/var/home/hyper/Cloud/GoogleDrive" \
-        ["rclone-onedrive"]="/var/home/hyper/Cloud/OneDrive" \
+        ["rclone-dropbox"]="/var$HOME/Cloud/Dropbox" \
+        ["rclone-gdrive"]="/var$HOME/Cloud/GoogleDrive" \
+        ["rclone-onedrive"]="/var$HOME/Cloud/OneDrive" \
     ); \
     for svc in rclone-dropbox rclone-gdrive rclone-onedrive; do \
         if systemctl --user is-active --quiet "$svc.service" 2>/dev/null; then \

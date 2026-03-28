@@ -100,17 +100,17 @@ procedure Cloud_Sync_Tuner is
    Services : constant Service_Array (1 .. 3) := (
       1 => (To_Unbounded_String ("Dropbox"),
             To_Unbounded_String ("dropbox:"),
-            To_Unbounded_String ("/var/home/hyper/Cloud/Dropbox"),
+            To_Unbounded_String ("/var$HOME/Cloud/Dropbox"),
             To_Unbounded_String ("rclone-dropbox"),
             True),
       2 => (To_Unbounded_String ("Google Drive"),
             To_Unbounded_String ("gdrive:"),
-            To_Unbounded_String ("/var/home/hyper/Cloud/GoogleDrive"),
+            To_Unbounded_String ("/var$HOME/Cloud/GoogleDrive"),
             To_Unbounded_String ("rclone-gdrive"),
             True),
       3 => (To_Unbounded_String ("OneDrive"),
             To_Unbounded_String ("onedrive:"),
-            To_Unbounded_String ("/var/home/hyper/Cloud/OneDrive"),
+            To_Unbounded_String ("/var$HOME/Cloud/OneDrive"),
             To_Unbounded_String ("rclone-onedrive"),
             True)
    );
@@ -120,7 +120,7 @@ procedure Cloud_Sync_Tuner is
    Smart_Config   : Smart_Sync_Config;
    Pinned_Folders : Pinned_Array;
    Pinned_Count   : Natural := 0;
-   Offline_Dir    : constant String := "/home/hyper/Offline";
+   Offline_Dir    : constant String := "$HOME/Offline";
 
    -- Help context tracking
    type Help_Context is (None, Mode_Select, Service_Select, Rate_Config_Help,
