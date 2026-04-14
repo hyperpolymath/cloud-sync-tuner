@@ -5,6 +5,8 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
 # Default recipe
+import? "contractile.just"
+
 default:
     @just --list
 
