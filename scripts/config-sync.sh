@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Sync cloud-sync-tuner configuration between machines via secure channel
 
 set -euo pipefail

@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: PMPL-1.0-or-later
+-- SPDX-License-Identifier: MPL-2.0
 -- Cloud Sync Tuner - Test Runner
 -- Executes all unit and integration tests
 

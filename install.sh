@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Cloud Sync Tuner - Install Script
 # Installs cloud-sync-tuner and all components
 

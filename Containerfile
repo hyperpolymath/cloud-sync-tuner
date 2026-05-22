@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Cloud Sync Tuner - Wolfi-based container image
 
 FROM cgr.dev/chainguard/wolfi-base:latest AS builder

@@ -1,10 +1,10 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 class CloudSyncTuner < Formula
   desc "Ada TUI for managing rclone cloud mounts with rate limiting"
   homepage "https://github.com/hyperpolymath/cloud-sync-tuner"
   url "https://github.com/hyperpolymath/cloud-sync-tuner/archive/v1.0.0.tar.gz"
   sha256 "PLACEHOLDER"
-  license "PMPL-1.0-or-later"
+  license "MPL-2.0"
   head "https://github.com/hyperpolymath/cloud-sync-tuner.git", branch: "main"
 
   depends_on "gprbuild" => :build

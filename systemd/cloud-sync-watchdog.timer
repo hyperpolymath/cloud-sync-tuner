@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 [Unit]
 Description=Cloud Sync Watchdog Timer - Periodic Health Check
 Documentation=https://github.com/hyperpolymath/cloud-sync-tuner

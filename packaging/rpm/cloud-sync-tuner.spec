@@ -1,10 +1,10 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 Name:           cloud-sync-tuner
 Version:        1.0.0
 Release:        1%{?dist}
 Summary:        Ada TUI for managing rclone cloud mounts with rate limiting
 
-License:        PMPL-1.0-or-later
+License:        MPL-2.0
 URL:            https://github.com/hyperpolymath/cloud-sync-tuner
 Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 

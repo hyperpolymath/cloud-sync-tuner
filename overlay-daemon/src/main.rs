@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 //! cloud-sync-overlay: File manager overlay icon daemon for rclone cloud mounts
 //!
 //! Monitors rclone mount status and provides sync state to file managers
