@@ -52,3 +52,5 @@ Containerfile  text eol=lf
 # Lock files
 Cargo.lock  text eol=lf -diff
 flake.lock  text eol=lf -diff
+# Pending estate-wide policy: hide Python from primary-language detection.
+**/*.py linguist-detectable=false
