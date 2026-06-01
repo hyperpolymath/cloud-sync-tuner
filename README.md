@@ -1,0 +1,295 @@
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?logo=github)](https://github.com/sponsors/hyperpolymath)
+
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="https://opensource.org/licenses/MPL-2.0"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+
+
+// SPDX-License-Identifier: MPL-2.0-or-later
+= Cloud Sync Tuner
+
+
+
+:toc:
+:icons: font
+
+image:https://img.shields.io/badge/RSR-Bronze-cd7f32[RSR Bronze,link=https://github.com/hyperpolymath/rhodium-standard-repositories]
+
+== License & Philosophy
+
+This project must declare **MPL-2.0-or-later** for platform/tooling compatibility.
+
+Philosophy: **Palimpsest**. The Palimpsest-MPL (PMPL) text is provided in `license/PMPL-1.0.txt`, and the canonical source is the palimpsest-license repository.
+
+Ada TUI for managing rclone cloud mount configurations with rate limiting, SDP (Software-Defined Perimeter) security, and Zig FFI integration.
+
+== Problem
+
+Cloud providers (especially Dropbox) enforce strict API rate limits. Default rclone settings trigger:
+
+[source]
+----
+Error too_many_requests/. Too many requests. Trying again in 300 seconds.
+----
+
+== Solution
+
+Configure optimal VFS cache modes and rate limiting via TUI or CLI, wrapped in a zero-trust SDP architecture with post-quantum identity management.
+
+== Cache Modes
+
+[cols="1,1,1,1"]
+|===
+|Mode |API Usage |Disk Use |Best For
+
+|Off |🔴 Very High |None |Read-only browsing
+|Minimal |🟠 High |Low |Light usage
+|**Writes** |🟢 Low |Medium |**Daily use (default)**
+|Full |🔴 Very High |High |Offline-first
+|===
+
+== Quick Start
+
+[source,bash]
+----
+# Build
+gprbuild -P cloud_sync_tuner.gpr
+
+# Run TUI
+./bin/cloud_sync_tuner
+
+# Or CLI mode
+./bin/cloud_sync_tuner writes
+----
+
+== Container (nerdctl + Wolfi)
+
+[source,bash]
+----
+# Build
+nerdctl build -t cloud-sync-tuner .
+
+# Run interactive
+nerdctl run -it --rm cloud-sync-tuner
+
+# With compose (includes optional aria2)
+nerdctl compose up
+nerdctl compose --profile accelerated up  # with aria2
+nerdctl compose --profile vpn up          # with WireGuard SDP
+----
+
+== SDP (Software-Defined Perimeter)
+
+Cloud Sync Tuner supports zero-trust network architecture:
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────────┐
+│                     Host System                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────┐    ┌─────────────────────────────────┐ │
+│  │   cicada container  │    │    cloud-sync container         │ │
+│  │   (network: none)   │    │    (network: vpn-only)          │ │
+│  │                     │    │                                 │ │
+│  │   Post-quantum      │◄───┤  WireGuard + rclone + FUSE      │ │
+│  │   identity/keys     │    │                                 │ │
+│  └─────────────────────┘    └─────────────────────────────────┘ │
+│            │ Unix socket only                                    │
+│            └──────────────────────────────────────────────────── │
+└─────────────────────────────────────────────────────────────────┘
+----
+
+Key features:
+
+* **cicada integration** - Post-quantum cryptographic identity (Kyber768 + x25519 hybrid)
+* **Network isolation** - cicada container has `network_mode: none`
+* **Unix socket IPC** - Key material never touches network interfaces
+* **WireGuard VPN** - Encrypted tunnel before any cloud access
+
+See link:sdp/CICADA-ISOLATION.adoc[Cicada Isolation Architecture] for details.
+
+== Zig FFI Libraries
+
+Cloud Sync Tuner integrates with Zig FFI bindings for cross-platform support:
+
+[cols="1,2,1"]
+|===
+|Library |Purpose |Repo
+
+|**zig-wireguard**
+|VPN tunnel management via libwireguard
+|https://github.com/hyperpolymath/zig-wireguard[zig-wireguard]
+
+|**zig-rclone**
+|Cloud storage via librclone (40+ backends)
+|https://github.com/hyperpolymath/zig-rclone[zig-rclone]
+
+|**zig-fuse-ext**
+|Extended FUSE with rate limiting/caching
+|https://github.com/hyperpolymath/zig-fuse-ext[zig-fuse-ext]
+|===
+
+=== Why Zig FFI?
+
+[cols="1,2"]
+|===
+|Feature |Benefit
+
+|`@cImport` |Direct C header import, no manual bindings
+|Cross-compilation |Single build for Linux, macOS, FreeBSD, Windows
+|No hidden malloc |Explicit memory, allocator control
+|Error unions |Convert C error codes to Zig errors
+|===
+
+== Acceleration Options
+
+=== aria2 Integration
+
+aria2 provides significant download acceleration through:
+
+* **Multi-connection downloads** - 16 connections per file
+* **Segmented downloading** - splits files for parallel fetch
+* **Resume support** - continues interrupted transfers
+* **RPC interface** - programmatic control
+
+Enhancement potential: **3-10x faster downloads** for large files.
+
+[source,bash]
+----
+# Enable in compose
+nerdctl compose --profile accelerated up
+
+# aria2 RPC available at localhost:6800
+----
+
+=== pssh (Parallel SSH)
+
+For multi-host scenarios (syncing to multiple servers):
+
+* **Parallel execution** - run commands across hosts simultaneously
+* **Batch operations** - deploy service files to multiple machines
+* **Centralized management** - single point of control
+
+Enhancement potential: **Linear speedup** with host count for deployment.
+
+[source,bash]
+----
+# Deploy to multiple hosts
+pssh -h hosts.txt -i 'systemctl --user restart rclone-dropbox'
+
+# Copy generated configs
+pscp -h hosts.txt output/*.service ~/.config/systemd/user/
+----
+
+== Architecture
+
+[source]
+----
+┌─────────────────────────────────────────────────────────────┐
+│                   Cloud Sync Tuner                           │
+│                      (Ada TUI)                               │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+         ┌───────────────┼───────────────┐
+         │               │               │
+         ▼               ▼               ▼
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│ zig-rclone  │  │zig-wireguard│  │zig-fuse-ext │
+│ (storage)   │  │   (VPN)     │  │  (mount)    │
+└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+       │                │                │
+       ▼                ▼                ▼
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│  librclone  │  │libwireguard │  │  libfuse3   │
+│   (Go→C)    │  │    (C)      │  │    (C)      │
+└─────────────┘  └─────────────┘  └─────────────┘
+----
+
+== Laminar Integration
+
+This tool complements https://github.com/hyperpolymath/laminar[laminar] for cloud-to-cloud transfers:
+
+* Laminar handles streaming transfers between clouds
+* Cloud Sync Tuner manages local mount configurations
+* Both use rclone as the data plane
+* zig-rclone enables embedded transfers without subprocess overhead
+
+== Supported Services
+
+* Dropbox (`dropbox:`)
+* Google Drive (`gdrive:`)
+* OneDrive (`onedrive:`)
+* 40+ additional backends via librclone
+
+== Platform Support
+
+[cols="1,1,1,1,1,1"]
+|===
+|Platform |i386 |amd64 |ARM |RISC-V |Notes
+
+|Linux |✓ |✓ |✓ |✓ |Full support
+|macOS |- |✓ |✓ |- |macFUSE required
+|FreeBSD |- |✓ |- |- |fusefs-libs
+|Windows |- |✓ |- |- |No FUSE, remote ops only
+|Minix |✓ |✓ |- |- |libcurl fallback
+|Android |- |✓ |✓ |- |No mounts, remote ops only
+|===
+
+== v1.0 Features
+
+=== Smart Sync
+
+[cols="1,2"]
+|===
+|Feature |Description
+
+|Cache size limits |Auto-evict old files when cache exceeds threshold
+|Min free space |Emergency eviction when disk runs low
+|Write-back buffering |Buffer writes locally before uploading
+|Pinned folders |Mark folders for offline access (like native clients)
+|Bandwidth scheduling |Time-based bandwidth limits
+|Conflict resolution |Configurable strategy (newer/older/larger/path1)
+|===
+
+=== Desktop Integration
+
+* **System tray daemon** (`cloud-sync-tray`) - Real-time sync status icon
+* **Nautilus extension** - Sync status emblems in GNOME Files
+* **Dolphin service menu** - Context menu actions in KDE
+* **Desktop notifications** - Alerts for sync events
+
+=== Enterprise Features
+
+* **SELinux policy** - Confined `rclone_t` domain
+* **Auditd rules** - File access logging for compliance
+* **Health check** - `cloud-sync-status` command for monitoring
+* **Watchdog timer** - Automatic service recovery
+
+=== Just Recipes
+
+[source,bash]
+----
+just cookbook-dropbox-fix      # Fix Dropbox rate limiting
+just cookbook-offline-setup    # Setup offline folders
+just cookbook-max-performance  # Maximum caching
+just cookbook-enterprise       # Enable SELinux + audit
+----
+
+== Installation (v1.0)
+
+[source,bash]
+----
+git clone https://github.com/hyperpolymath/cloud-sync-tuner
+cd cloud-sync-tuner
+just install
+----
+
+See `justfile` for all available recipes.
+
+== License
+
+MPL-2.0
+
+
+== Architecture
+
+See link:TOPOLOGY.md[TOPOLOGY.md] for a visual architecture map and completion dashboard.
