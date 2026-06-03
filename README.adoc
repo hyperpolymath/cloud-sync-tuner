@@ -1,9 +1,12 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,link="https://opensource.org/licenses/MPL-2.0"]
 image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
 
 
-// SPDX-License-Identifier: MPL-2.0-or-later
 = Cloud Sync Tuner
+image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssourcesecurity[OpenSSF Best Practices,link="https://www.bestpractices.dev/en/projects/new?repo_url=https://github.com/hyperpolymath/cloud-sync-tuner"]
+
 
 
 
@@ -16,7 +19,7 @@ image:https://img.shields.io/badge/RSR-Bronze-cd7f32[RSR Bronze,link=https://git
 
 This project must declare **MPL-2.0-or-later** for platform/tooling compatibility.
 
-Philosophy: **Palimpsest**. The Palimpsest-MPL (PMPL) text is provided in `license/PMPL-1.0.txt`, and the canonical source is the palimpsest-license repository.
+Philosophy: **Palimpsest**. The MPL-2.0 (PMPL) text is provided in `license/MPL-2.0.txt`, and the canonical source is the palimpsest-license repository.
 
 Ada TUI for managing rclone cloud mount configurations with rate limiting, SDP (Software-Defined Perimeter) security, and Zig FFI integration.
 
