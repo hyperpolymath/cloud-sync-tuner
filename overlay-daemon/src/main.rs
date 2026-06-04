@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 //! cloud-sync-overlay: File manager overlay icon daemon for rclone cloud mounts
 //!
 //! Monitors rclone mount status and provides sync state to file managers
