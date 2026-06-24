@@ -4,7 +4,7 @@ image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0-or-later,lin
 image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
 
 
-// SPDX-License-Identifier: MPL-2.0-or-later
+// SPDX-License-Identifier: CC-BY-SA-4.0
 = Cloud Sync Tuner
 
 

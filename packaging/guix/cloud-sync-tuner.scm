@@ -1,4 +1,4 @@
-;;; SPDX-License-Identifier: MPL-2.0-or-later
+;;; SPDX-License-Identifier: MPL-2.0
 ;;; Cloud Sync Tuner - Guix package definition
 
 (define-module (cloud-sync-tuner)
