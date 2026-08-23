@@ -15,7 +15,7 @@ This directory contains package definitions for various package managers and pla
 | `chocolatey/` | Windows | `choco install cloud-sync-tuner` |
 | `scoop/` | Windows | `scoop install cloud-sync-tuner` |
 | `winget/` | Windows | `winget install cloud-sync-tuner` |
-| `nix/` | NixOS/Nix | `nix profile install` |
+| `guix/` | NixOS/Guix | `guix profile install` |
 | `guix/` | GNU Guix | `guix install cloud-sync-tuner` |
 | `flatpak/` | Universal Linux | `flatpak install cloud-sync-tuner` |
 | `alire/` | Ada (Alire) | `alr get cloud_sync_tuner` |
@@ -81,10 +81,10 @@ brew install --build-from-source packaging/homebrew/cloud-sync-tuner.rb
 # Submit to homebrew-core or a tap
 ```
 
-### Nix
+### Guix
 
 ```bash
-nix build .#cloud-sync-tuner
+guix build .#cloud-sync-tuner
 # Or add to nixpkgs
 ```
 
