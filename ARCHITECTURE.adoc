@@ -1,131 +1,48 @@
-// SPDX-License-Identifier: CC-BY-SA-4.0
-= Cloud Sync Tuner Architecture
-:toc:
+== Architecture
 
-== Layer Diagram
+=== Overview
 
-[source]
-----
-┌─────────────────────────────────────────────────────────────────┐
-│                     LAYER 1: User Interface                     │
-│                  Ada TUI / CLI (cloud_sync_tuner)               │
-│  Seam: config.toml parsing, input validation                    │
-└─────────────────────────────┬───────────────────────────────────┘
-                              │ Cache mode selection
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   LAYER 2: Service Generator                    │
-│              Template expansion → .service files                │
-│  Seam: Path substitution, rate limit injection                  │
-└─────────────────────────────┬───────────────────────────────────┘
-                              │ systemd unit files
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   LAYER 3: Container Runtime                    │
-│              Wolfi image / nerdctl / podman                     │
-│  Seam: Volume mounts, capability management                     │
-└─────────────────────────────┬───────────────────────────────────┘
-                              │ FUSE mount requests
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     LAYER 4: Network/SDP                        │
-│              WireGuard tunnel / cicada identity                 │
-│  Seam: Key exchange, tunnel establishment                       │
-└─────────────────────────────┬───────────────────────────────────┘
-                              │ Encrypted traffic
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   LAYER 5: Cloud Backends                       │
-│                    rclone → Dropbox/GDrive/OneDrive             │
-│  Seam: OAuth tokens, rate limit handling                        │
-└─────────────────────────────────────────────────────────────────┘
-----
+This repository follows a modular, maintainable architecture designed
+for clarity, scalability, and long-term sustainability.
 
-== Seam Analysis
+=== Directory Structure
 
-=== High Friction Points (smoothed)
+....
+.
+├── src/           # Source code
+├── tests/        # Test suites
+├── docs/         # Documentation
+├── scripts/      # Utility scripts
+├── config/       # Configuration files
+├── LICENSE       # License file
+├── LICENSES/     # Full license texts
+└── README.adoc   # Project documentation
+....
 
-[cols="1,2,2"]
-|===
-|Seam |Issue |Resolution
+=== Design Principles
 
-|TUI → Generator
-|Hard-coded paths
-|config.toml with `${VAR}` expansion
+* *Separation of Concerns*: Each module has a single responsibility
+* *Testability*: Code is written to be easily testable
+* *Documentation*: All public APIs are documented
+* *Configuration*: Environment-specific settings are externalized
 
-|Container → Host
-|SYS_ADMIN capability
-|Rootless mode, minimal capabilities
+=== Dependencies
 
-|VPN → Cloud
-|Static IP AllowedIPs
-|DNS-based routing, split tunnel
-|===
+* External dependencies are minimized and clearly declared
+* Version pinning is used for reproducibility
 
-=== Attack Surface Reduction
+=== Security Considerations
 
-[cols="1,1,2"]
-|===
-|Layer |Risk |Mitigation
+* Sensitive data is never committed to the repository
+* Secrets are managed through environment variables or secure vaults
+* Regular dependency audits are performed
 
-|Container
-|Privilege escalation
-|`--cap-drop=ALL --cap-add=SYS_ADMIN` (FUSE only)
+=== Maintainability
 
-|VPN
-|Key compromise
-|cicada post-quantum keys, auto-rotation
+* Code follows consistent style guidelines
+* Pull requests require review and CI checks
+* Issues and discussions are tracked transparently
 
-|Cloud
-|Token theft
-|Encrypted rclone.conf, short-lived tokens
-|===
+'''''
 
-== Platform Compatibility
-
-[cols="1,1,1,2"]
-|===
-|Platform |Container |Native |Notes
-
-|Linux (all arch)
-|✓
-|✓
-|Full support
-
-|macOS
-|✓ (VM)
-|✓
-|Rosetta for arm64
-
-|Windows
-|✓ (WSL2)
-|❌
-|Native GNAT exists but FUSE doesn't
-
-|Android
-|Limited
-|✓
-|Termux build, no FUSE
-
-|**iOS**
-|❌
-|Possible
-|Needs Swift wrapper, no FUSE
-
-|**Minix**
-|❌
-|Needs C port
-|libcurl-based alternative needed
-|===
-
-== Build Matrix
-
-For maximum portability, maintain two codebases:
-
-1. **Ada version** (this repo) - Linux/macOS/FreeBSD containers
-2. **C/libcurl version** (future) - iOS/Minix/embedded
-
-The C version would share:
-- config.toml format
-- Service file templates
-- Rate limit constants
+_Last updated: 2026-07-18_
