@@ -27,8 +27,7 @@ FROM cgr.dev/chainguard/wolfi-base:latest
 RUN apk add --no-cache \
     rclone \
     fuse3 \
-    libgcc \
-    gcompat
+    libgcc
 
 RUN adduser -D -h /home/tuner tuner
 USER tuner
