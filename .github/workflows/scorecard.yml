@@ -2,6 +2,7 @@
 name: Scorecards supply-chain security
 
 on:
+  workflow_dispatch:
   branch_protection_rule:
   schedule:
     - cron: '23 4 * * 1'
@@ -10,8 +11,9 @@ permissions: read-all
 
 jobs:
   analysis:
-    uses: hyperpolymath/standards/.github/workflows/scorecard-reusable.yml@7fdc2705df74b4e352d2a1cde3e87a5923fdf329
+    uses: hyperpolymath/standards/.github/workflows/scorecard-reusable.yml@257869d3061d5a8ed1529bf34225d90a2416d51a
     permissions:
+      actions: read
       contents: read
       security-events: write
       id-token: write
