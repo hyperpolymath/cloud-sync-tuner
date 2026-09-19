@@ -189,7 +189,7 @@ A secure, cross-platform cloud synchronization system with:
 
 == Contributing
 
-See link:CONTRIBUTING.adoc[CONTRIBUTING.adoc] for how to help with roadmap items.
+See link:.github/CONTRIBUTING.md[.github/CONTRIBUTING.md] for how to help with roadmap items.
 
 Priority areas:
 
