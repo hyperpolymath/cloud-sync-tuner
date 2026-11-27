@@ -1,0 +1,18 @@
+# package.json is JCS-canonical and pnpm-lock.yaml is tool-generated (LANGUAGE-POLICY §1.4).
+# Prettier must not reformat them.
+package.json
+pnpm-lock.yaml
+# Files without a Prettier baseline (not yet formatted); remove entries as they are formatted.
+.github/CONTRIBUTING.md
+.github/label-classifier.json
+.github/workflows/casket-pages.yml
+.github/workflows/codeql.yml
+.github/workflows/dogfood-gate.yml
+.github/workflows/hypatia-scan.yml
+.github/workflows/labels.yml
+.github/workflows/push-email-notify.yml
+.github/workflows/scorecard.yml
+compose.yaml
+nerdctl-compose.yaml
+packaging/flatpak/com.hyperpolymath.CloudSyncTuner.yml
+packaging/scoop/cloud-sync-tuner.json
